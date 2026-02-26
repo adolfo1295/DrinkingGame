@@ -7,12 +7,14 @@ import com.ac.drinkinggame.data.repository.PlayerRepositoryImpl
 import com.ac.drinkinggame.domain.repository.GameRepository
 import com.ac.drinkinggame.domain.repository.PlayerRepository
 import org.koin.android.ext.koin.androidContext
+import org.koin.core.module.dsl.bind
+import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
 private val Context.dataStore by preferencesDataStore(name = "settings")
 
 val dataModule = module {
-  single { androidContext().dataStore }
-  single<GameRepository> { GameRepositoryImpl(get()) }
-  single<PlayerRepository> { PlayerRepositoryImpl(get()) }
+    single { androidContext().dataStore }
+    singleOf(::GameRepositoryImpl) { bind<GameRepository>() }
+    singleOf(::PlayerRepositoryImpl) { bind<PlayerRepository>() }
 }

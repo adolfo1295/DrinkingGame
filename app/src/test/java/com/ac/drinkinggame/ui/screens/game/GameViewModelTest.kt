@@ -11,6 +11,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
@@ -43,7 +44,7 @@ class GameViewModelTest {
 
             // Second item is Success after LoadCards
             val state = awaitItem()
-            assert(state is GameState.Success)
+            assertTrue(state is GameState.Success)
             assertEquals(mockCards[0], (state as GameState.Success).currentCard)
         }
     }
@@ -65,17 +66,21 @@ class GameViewModelTest {
             // When
             viewModel.onIntent(GameIntent.LoadCards("cat1"))
 
-            // Success Card 1
+            // Success Card (either 1 or 2 due to shuffled)
             val firstState = awaitItem()
-            assert(firstState is GameState.Success)
+            assertTrue(firstState is GameState.Success)
+            val firstCard = (firstState as GameState.Success).currentCard
+            assertTrue(mockCards.contains(firstCard))
             
             // When
             viewModel.onIntent(GameIntent.NextCard)
             
-            // Then Success Card 2
+            // Then Success next card
             val secondState = awaitItem()
-            assert(secondState is GameState.Success)
-            assertEquals(mockCards[1], (secondState as GameState.Success).currentCard)
+            assertTrue(secondState is GameState.Success)
+            val secondCard = (secondState as GameState.Success).currentCard
+            assertTrue(mockCards.contains(secondCard))
+            assertTrue(firstCard != secondCard) // Confirmamos que rotó a la otra
             
             // When next again
             viewModel.onIntent(GameIntent.NextCard)
