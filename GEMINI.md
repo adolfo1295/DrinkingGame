@@ -42,6 +42,7 @@ El código fuente principal estará en `app/src/main/java/com/ac/drinkinggame/` 
 
 ## 4. Estándares de Código y Convenciones (Staff Rules)
 - **Kotlin Style:** Seguir estrictamente la [Official Kotlin Style Guide](https://kotlinlang.org/docs/coding-conventions.html).
+- **Indentation:** Uso mandatorio de **2 espacios** para indent (Tab size: 2, Indent: 2, Continuation indent: 8).
 - **Linter & Formatter:** Uso mandatorio de **ktlint**. Todo código nuevo debe pasar `./gradlew ktlintCheck` y ser formateado con `./gradlew ktlintFormat`.
 - **Jetpack Compose:** Priorizar componentes Material 3. Seguir el patrón de "State Hoisting". Evitar recomposiciones usando `derivedStateOf`, lambdas o primitivos.
 - **Iconos:** Preferir versiones `AutoMirrored` para componentes de navegación (ej: `Icons.AutoMirrored.Filled.ArrowBack`).

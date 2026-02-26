@@ -1,11 +1,14 @@
 package com.ac.drinkinggame.ui.screens.home
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -102,19 +105,29 @@ fun HomeScreen(
             horizontalArrangement = Arrangement.spacedBy(20.dp),
             modifier = Modifier.fillMaxWidth()
           ) {
-            items(s.categories) { category ->
-              CategoryCard(
-                category = category,
-                onClick = {
-                  if (s.players.isNotEmpty()) {
-                    if (category.isPremium) showPremiumDialog = true
-                    else onCategorySelected(category.id)
+            itemsIndexed(s.categories) { index, category ->
+              var visible by remember { mutableStateOf(false) }
+              LaunchedEffect(Unit) {
+                visible = true
+              }
+
+              AnimatedVisibility(
+                visible = visible,
+                enter = slideInVertically { it / 2 } + fadeIn(),
+                modifier = Modifier.padding(top = (index / 2 * 10).dp) // Pequeño offset visual
+              ) {
+                CategoryCard(
+                  category = category,
+                  onClick = {
+                    if (s.players.isNotEmpty()) {
+                      if (category.isPremium) showPremiumDialog = true
+                      else onCategorySelected(category.id)
+                    }
                   }
-                }
-              )
+                )
+              }
             }
           }
-
           if (showPlayersDialog) {
             PlayersDialog(
               players = s.players,

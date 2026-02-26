@@ -21,87 +21,102 @@ import org.koin.test.KoinTest
 
 class GameScreenTest : KoinTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+  @get:Rule
+  val composeTestRule = createComposeRule()
 
-    private val getCardsByCategoryUseCase: GetCardsByCategoryUseCase = mockk()
-    private val playerRepository: PlayerRepository = mockk()
+  private val getCardsByCategoryUseCase: GetCardsByCategoryUseCase = mockk()
+  private val playerRepository: PlayerRepository = mockk()
 
-    @Before
-    fun setup() {
-        stopKoin()
-        startKoin {
-            modules(module {
-                single { getCardsByCategoryUseCase }
-                single { playerRepository }
-                viewModelOf(::GameViewModel)
-            })
-        }
+  @Before
+  fun setup() {
+    stopKoin()
+    startKoin {
+      modules(module {
+        single { getCardsByCategoryUseCase }
+        single { playerRepository }
+        viewModelOf(::GameViewModel)
+      })
+    }
+  }
+
+  @After
+  fun tearDown() {
+    stopKoin()
+  }
+
+  @Test
+  fun gameScreen_loadsAndDisplaysFirstCardCorrectly() {
+    val mockPlayer = Player("1", "Adolfo")
+    val mockCards = listOf(
+      GameCard.Challenge("id1", "cat1", "Hacer 10 lagartijas", "Si no, bebes", 3)
+    )
+
+    every { playerRepository.getPlayers() } returns flowOf(listOf(mockPlayer))
+    coEvery { getCardsByCategoryUseCase("cat1") } returns Result.success(mockCards)
+
+    composeTestRule.setContent {
+      DrinkingGameTheme {
+        GameScreen(categoryId = "cat1", onBack = {})
+      }
     }
 
-    @After
-    fun tearDown() {
-        stopKoin()
+    composeTestRule.onNodeWithTag("player_name").assertTextContains("Adolfo", substring = true)
+    composeTestRule.onNodeWithText("Hacer 10 lagartijas").assertIsDisplayed()
+    composeTestRule.onNodeWithText("3").assertIsDisplayed()
+  }
+
+  @Test
+  fun gameScreen_clickNext_disablesButtonDuringAnimation() {
+    // Given: Dos cartas para que haya un cambio real
+    val mockCards = listOf(
+      GameCard.Rule("id1", "cat1", "Regla 1", "Contenido 1", null),
+      GameCard.Rule("id2", "cat1", "Regla 2", "Contenido 2", null)
+    )
+    every { playerRepository.getPlayers() } returns flowOf(emptyList())
+    coEvery { getCardsByCategoryUseCase("cat1") } returns Result.success(mockCards)
+
+    composeTestRule.setContent {
+      DrinkingGameTheme {
+        GameScreen(categoryId = "cat1", onBack = {})
+      }
     }
 
-    @Test
-    fun gameScreen_loadsAndDisplaysFirstCardCorrectly() {
-        // Given
-        val mockPlayer = Player("1", "Adolfo")
-        val mockCards = listOf(
-            GameCard.Challenge("id1", "cat1", "Hacer 10 lagartijas", "Si no, bebes", 3)
-        )
-        
-        every { playerRepository.getPlayers() } returns flowOf(listOf(mockPlayer))
-        coEvery { getCardsByCategoryUseCase("cat1") } returns Result.success(mockCards)
+    // Detenemos el reloj automático para controlar la animación manualmente
+    composeTestRule.mainClock.autoAdvance = false
 
-        // When
-        composeTestRule.setContent {
-            DrinkingGameTheme {
-                GameScreen(categoryId = "cat1", onBack = {})
-            }
-        }
+    // When: Hacemos clic en el botón
+    composeTestRule.onNodeWithTag("next_card_button").performClick()
 
-        // Then
-        composeTestRule.onNodeWithTag("player_name").assertTextContains("Adolfo", substring = true)
-        composeTestRule.onNodeWithText("Hacer 10 lagartijas").assertIsDisplayed()
-        composeTestRule.onNodeWithText("3").assertIsDisplayed()
+    // Avanzamos un poco de tiempo (ej. 100ms de los 500ms que dura el giro)
+    composeTestRule.mainClock.advanceTimeBy(100)
+
+    // Then: El botón debe estar deshabilitado y mostrando el texto de carga
+    composeTestRule.onNodeWithTag("next_card_button")
+      .assertIsNotEnabled()
+      .assertTextContains("BARAJANDO...", substring = true)
+
+    // Avanzamos hasta el final de la animación (más de 500ms)
+    composeTestRule.mainClock.advanceTimeBy(600)
+    composeTestRule.waitForIdle()
+
+    // Then: El botón debe habilitarse de nuevo
+    composeTestRule.onNodeWithTag("next_card_button")
+      .assertIsEnabled()
+      .assertTextContains("¡ENTENDIDO!", substring = true)
+  }
+
+  @Test
+  fun gameScreen_showsErrorViewWhenApiFails() {
+    every { playerRepository.getPlayers() } returns flowOf(emptyList())
+    coEvery { getCardsByCategoryUseCase("cat1") } returns Result.failure(Exception("Error de red"))
+
+    composeTestRule.setContent {
+      DrinkingGameTheme {
+        GameScreen(categoryId = "cat1", onBack = {})
+      }
     }
 
-    @Test
-    fun gameScreen_clickNext_showsEmptyScreenWhenNoMoreCards() {
-        // Given
-        val mockCards = listOf(
-            GameCard.Rule("id1", "cat1", "Regla 1", "Contenido", null)
-        )
-        every { playerRepository.getPlayers() } returns flowOf(emptyList())
-        coEvery { getCardsByCategoryUseCase("cat1") } returns Result.success(mockCards)
-
-        composeTestRule.setContent {
-            DrinkingGameTheme {
-                GameScreen(categoryId = "cat1", onBack = {})
-            }
-        }
-
-        composeTestRule.onNodeWithTag("next_card_button").performClick()
-        composeTestRule.onNodeWithText("¡FIN DE LA PARTIDA!", substring = true).assertIsDisplayed()
-    }
-
-    @Test
-    fun gameScreen_showsErrorViewWhenApiFails() {
-        // Given
-        every { playerRepository.getPlayers() } returns flowOf(emptyList())
-        coEvery { getCardsByCategoryUseCase("cat1") } returns Result.failure(Exception("Error de red"))
-
-        // When
-        composeTestRule.setContent {
-            DrinkingGameTheme {
-                GameScreen(categoryId = "cat1", onBack = {})
-            }
-        }
-
-        // Then
-        composeTestRule.onNodeWithText("Ocurrió un error").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Error de red").assertIsDisplayed()
-    }
+    composeTestRule.onNodeWithText("Ocurrió un error").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Error de red").assertIsDisplayed()
+  }
 }

@@ -59,8 +59,10 @@ fun GameScreen(
     ) {
       AnimatedContent(
         targetState = state,
+        contentKey = { it::class }, // Usamos la clase como key para que Success sea estable
         label = "game_content"
       ) { targetState ->
+
         when (targetState) {
           GameState.Loading -> LoadingView()
           is GameState.Success -> SuccessView(

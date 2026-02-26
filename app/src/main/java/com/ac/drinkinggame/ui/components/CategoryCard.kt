@@ -1,16 +1,20 @@
 package com.ac.drinkinggame.ui.components
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -20,6 +24,10 @@ import com.ac.drinkinggame.ui.theme.NightclubCard
 
 @Composable
 fun CategoryCard(category: Category, onClick: () -> Unit) {
+  val interactionSource = remember { MutableInteractionSource() }
+  val isPressed by interactionSource.collectIsPressedAsState()
+  val scale by animateFloatAsState(if (isPressed) 0.94f else 1f, label = "card_scale")
+
   val borderColor = if (category.isPremium) Color(0xFFFFD700) else Color.White.copy(alpha = 0.1f)
   val containerColor = if (category.isPremium) NightclubCard.copy(alpha = 0.8f) else NightclubCard
 
@@ -27,12 +35,21 @@ fun CategoryCard(category: Category, onClick: () -> Unit) {
     modifier = Modifier
       .fillMaxWidth()
       .height(160.dp)
-      .clickable(onClick = onClick),
+      .graphicsLayer {
+        scaleX = scale
+        scaleY = scale
+      }
+      .clickable(
+        interactionSource = interactionSource,
+        indication = null, // Usamos nuestra propia animación de escala
+        onClick = onClick
+      ),
     colors = CardDefaults.cardColors(containerColor = containerColor),
     shape = RoundedCornerShape(28.dp),
     border = BorderStroke(if (category.isPremium) 2.dp else 1.dp, borderColor),
-    elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
+    elevation = CardDefaults.cardElevation(defaultElevation = if (isPressed) 2.dp else 12.dp)
   ) {
+
     Box(modifier = Modifier.fillMaxSize()) {
       if (category.isPremium) {
         Box(
