@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -97,7 +98,7 @@ private fun SuccessView(
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 color = SabiondoPrimary,
-                modifier = Modifier.padding(bottom = 8.dp)
+                modifier = Modifier.padding(bottom = 8.dp).testTag("player_name")
             )
         }
 
@@ -200,16 +201,18 @@ private fun SuccessView(
       }
     }
 
-    Button(
-      onClick = onNext,
-      modifier = Modifier
-        .fillMaxWidth()
-        .height(64.dp),
-      shape = RoundedCornerShape(16.dp),
-      colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-    ) {
-      Text("¡ENTENDIDO!", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-    }
+            Button(
+                onClick = onNext,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(64.dp)
+                    .testTag("next_card_button"),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+            ) {
+                Text("¡ENTENDIDO!", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            }
+    
   }
 }
 
