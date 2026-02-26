@@ -45,125 +45,132 @@ fun HomeScreen(
     var showPlayersDialog by remember { mutableStateOf(false) }
     var showPremiumDialog by remember { mutableStateOf(false) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        containerColor = MaterialTheme.colorScheme.background
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = "Drinking Game",
-                style = MaterialTheme.typography.displaySmall,
-                fontWeight = FontWeight.Black,
-                color = Color.White,
-                letterSpacing = (-1).sp
-            )
-            
-            IconButton(
-                onClick = { showPlayersDialog = true },
-                modifier = Modifier
-                    .size(56.dp)
-                    .background(Color.White.copy(alpha = 0.1f), CircleShape)
-                    .testTag("players_button")
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Default.Person, 
-                    contentDescription = "Jugadores", 
-                    tint = Color.White,
-                    modifier = Modifier.size(30.dp)
+                Text(
+                    text = "Drinking Game",
+                    style = MaterialTheme.typography.displaySmall,
+                    fontWeight = FontWeight.Black,
+                    color = Color.White,
+                    letterSpacing = (-1).sp
                 )
+
+                IconButton(
+                    onClick = { showPlayersDialog = true },
+                    modifier = Modifier
+                        .size(56.dp)
+                        .background(Color.White.copy(alpha = 0.1f), CircleShape)
+                        .testTag("players_button")
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Jugadores",
+                        tint = Color.White,
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
             }
-        }
 
-        Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-        Text(
-            text = "Selecciona un modo de juego",
-            style = MaterialTheme.typography.titleMedium,
-            color = Color.White.copy(alpha = 0.6f),
-            modifier = Modifier.align(Alignment.Start)
-        )
+            Text(
+                text = "Selecciona un modo de juego",
+                style = MaterialTheme.typography.titleMedium,
+                color = Color.White.copy(alpha = 0.6f),
+                modifier = Modifier.align(Alignment.Start)
+            )
 
-        Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
-        when (val s = state) {
-            HomeState.Loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = SabiondoPrimary)
-            }
-            is HomeState.Success -> {
-                if (s.players.isEmpty()) {
-                    // Alerta Elegante de Jugadores
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 32.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.9f)
-                        ),
-                        shape = RoundedCornerShape(20.dp),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f))
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(20.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            when (val s = state) {
+                HomeState.Loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = SabiondoPrimary)
+                }
+
+                is HomeState.Success -> {
+                    if (s.players.isEmpty()) {
+                        // Alerta Elegante de Jugadores
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 32.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.9f)
+                            ),
+                            shape = RoundedCornerShape(20.dp),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f))
                         ) {
-                            Icon(
-                                Icons.Default.Warning, 
-                                contentDescription = null, 
-                                tint = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.size(28.dp)
-                            )
-                            Text(
-                                "Se requiere al menos un jugador para iniciar el juego.",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onErrorContainer
+                            Row(
+                                modifier = Modifier.padding(20.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                Icon(
+                                    Icons.Default.Warning,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.size(28.dp)
+                                )
+                                Text(
+                                    "Se requiere al menos un jugador para iniciar el juego.",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onErrorContainer
+                                )
+                            }
+                        }
+                    }
+
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        verticalArrangement = Arrangement.spacedBy(20.dp),
+                        horizontalArrangement = Arrangement.spacedBy(20.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        items(s.categories) { category ->
+                            CategoryCard(
+                                category = category,
+                                onClick = {
+                                    if (s.players.isNotEmpty()) {
+                                        if (category.isPremium) showPremiumDialog = true
+                                        else onCategorySelected(category.id)
+                                    }
+                                }
                             )
                         }
                     }
-                }
 
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    verticalArrangement = Arrangement.spacedBy(20.dp),
-                    horizontalArrangement = Arrangement.spacedBy(20.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    items(s.categories) { category ->
-                        CategoryCard(
-                            category = category, 
-                            onClick = { 
-                                if (s.players.isNotEmpty()) {
-                                    if (category.isPremium) showPremiumDialog = true 
-                                    else onCategorySelected(category.id)
-                                }
-                            }
+                    if (showPlayersDialog) {
+                        PlayersDialog(
+                            players = s.players,
+                            onAddPlayer = viewModel::addPlayer,
+                            onRemovePlayer = viewModel::removePlayer,
+                            onDismiss = { showPlayersDialog = false }
                         )
+                    }
+
+                    if (showPremiumDialog) {
+                        PremiumPaywallDialog(onDismiss = { showPremiumDialog = false })
                     }
                 }
 
-                if (showPlayersDialog) {
-                    PlayersDialog(
-                        players = s.players,
-                        onAddPlayer = viewModel::addPlayer,
-                        onRemovePlayer = viewModel::removePlayer,
-                        onDismiss = { showPlayersDialog = false }
-                    )
+                is HomeState.Error -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(s.message, color = MaterialTheme.colorScheme.error)
                 }
-
-                if (showPremiumDialog) {
-                    PremiumPaywallDialog(onDismiss = { showPremiumDialog = false })
-                }
-            }
-            is HomeState.Error -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(s.message, color = MaterialTheme.colorScheme.error)
             }
         }
     }
@@ -174,8 +181,8 @@ fun PremiumPaywallDialog(onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("🚀 ¡Pásate a Premium!") },
-        text = { 
-            Text("Desbloquea todos los modos de juego, cartas exclusivas y juega sin límites con tus amigos.") 
+        text = {
+            Text("Desbloquea todos los modos de juego, cartas exclusivas y juega sin límites con tus amigos.")
         },
         confirmButton = {
             Button(onClick = onDismiss) {
@@ -201,21 +208,23 @@ fun PlayersDialog(
 
     Dialog(onDismissRequest = onDismiss) {
         Card(
-            modifier = Modifier.fillMaxWidth().heightIn(max = 550.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(max = 550.dp),
             shape = RoundedCornerShape(32.dp),
             colors = CardDefaults.cardColors(containerColor = NightclubCard),
             border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
         ) {
             Column(modifier = Modifier.padding(28.dp)) {
                 Text(
-                    "Participantes", 
-                    style = MaterialTheme.typography.headlineSmall, 
+                    "Participantes",
+                    style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Black,
                     color = Color.White
                 )
-                
+
                 Spacer(modifier = Modifier.height(24.dp))
-                
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -225,7 +234,9 @@ fun PlayersDialog(
                         value = newPlayerName,
                         onValueChange = { newPlayerName = it },
                         placeholder = { Text("Nombre del jugador") },
-                        modifier = Modifier.weight(1f).testTag("player_input"),
+                        modifier = Modifier
+                            .weight(1f)
+                            .testTag("player_input"),
                         singleLine = true,
                         shape = RoundedCornerShape(16.dp),
                         colors = OutlinedTextFieldDefaults.colors(
@@ -235,9 +246,9 @@ fun PlayersDialog(
                             focusedBorderColor = SabiondoPrimary
                         )
                     )
-                    
+
                     IconButton(
-                        onClick = { 
+                        onClick = {
                             if (newPlayerName.isNotBlank()) {
                                 onAddPlayer(newPlayerName)
                                 newPlayerName = ""
@@ -270,7 +281,7 @@ fun PlayersDialog(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    player.name, 
+                                    player.name,
                                     style = MaterialTheme.typography.titleMedium,
                                     color = Color.White,
                                     fontWeight = FontWeight.Medium
@@ -282,8 +293,8 @@ fun PlayersDialog(
                                         .background(MaterialTheme.colorScheme.error.copy(alpha = 0.15f), CircleShape)
                                 ) {
                                     Icon(
-                                        Icons.Default.Delete, 
-                                        contentDescription = null, 
+                                        Icons.Default.Delete,
+                                        contentDescription = null,
                                         tint = MaterialTheme.colorScheme.error,
                                         modifier = Modifier.size(24.dp)
                                     )
@@ -297,7 +308,9 @@ fun PlayersDialog(
 
                 Button(
                     onClick = onDismiss,
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color.White)
                 ) {
@@ -349,7 +362,7 @@ private fun CategoryCard(category: Category, onClick: () -> Unit) {
                     )
                 }
             }
-            
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
