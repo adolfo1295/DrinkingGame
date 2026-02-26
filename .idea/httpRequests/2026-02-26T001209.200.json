@@ -1,0 +1,202 @@
+[
+  {
+    "id": "loc_001",
+    "category_id": "cat_loco_01",
+    "type": "CHALLENGE",
+    "content": {
+      "title": "Políglota",
+      "penalty": 3,
+      "description": "Habla con un acento extranjero exagerado hasta tu próximo turno. Si se te olvida o fallas, bebes 3."
+    }
+  },
+  {
+    "id": "loc_002",
+    "category_id": "cat_loco_01",
+    "type": "CHALLENGE",
+    "content": {
+      "title": "El Codo",
+      "penalty": 2,
+      "description": "Intenta lamerte el codo derecho. Si no puedes, bebes 2 tragos."
+    }
+  },
+  {
+    "id": "loc_003",
+    "category_id": "cat_loco_01",
+    "type": "CHALLENGE",
+    "content": {
+      "title": "Bailarín Estrella",
+      "penalty": 4,
+      "description": "Haz el baile del robot durante 10 segundos. Si te da pena y no lo haces, bebes 4."
+    }
+  },
+  {
+    "id": "loc_004",
+    "category_id": "cat_loco_01",
+    "type": "CHALLENGE",
+    "content": {
+      "title": "Comediante",
+      "penalty": 2,
+      "description": "Cuenta el peor chiste de papá que te sepas. Si nadie se ríe, bebes 2 tragos."
+    }
+  },
+  {
+    "id": "loc_005",
+    "category_id": "cat_loco_01",
+    "type": "CHALLENGE",
+    "content": {
+      "title": "Reflejos",
+      "penalty": 3,
+      "description": "¡Tóquense la nariz! El último en hacerlo bebe 3 tragos."
+    }
+  },
+  {
+    "id": "loc_006",
+    "category_id": "cat_loco_01",
+    "type": "CHALLENGE",
+    "content": {
+      "title": "El Mimo",
+      "penalty": 2,
+      "description": "Haz una imitación sin palabras de otro jugador. El primero en adivinar reparte 2 tragos."
+    }
+  },
+  {
+    "id": "loc_007",
+    "category_id": "cat_loco_01",
+    "type": "CHALLENGE",
+    "content": {
+      "title": "Ventrílocuo",
+      "penalty": 1,
+      "description": "Habla sin separar los dientes hasta que vuelva a ser tu turno. Si abres la boca para hablar, bebes 1."
+    }
+  },
+  {
+    "id": "loc_008",
+    "category_id": "cat_loco_01",
+    "type": "CHALLENGE",
+    "content": {
+      "title": "Serenata",
+      "penalty": 5,
+      "description": "Mándale un audio de voz cantando 'Feliz Cumpleaños' a un contacto aleatorio, o bebe 5 tragos."
+    }
+  },
+  {
+    "id": "loc_009",
+    "category_id": "cat_loco_01",
+    "type": "CHALLENGE",
+    "content": {
+      "title": "Estilo",
+      "penalty": 3,
+      "description": "El que lleve los calcetines más coloridos o con dibujos, reparte 3 tragos."
+    }
+  },
+  {
+    "id": "loc_010",
+    "category_id": "cat_loco_01",
+    "type": "CHALLENGE",
+    "content": {
+      "title": "Pausa Hidratante",
+      "penalty": 0,
+      "description": "¡Un respiro! Todos en la mesa deben tomar un buen sorbo de agua pura. Hidratarse es importante."
+    }
+  },
+  {
+    "id": "loc_011",
+    "category_id": "cat_loco_01",
+    "type": "CHALLENGE",
+    "content": {
+      "title": "El Rapero",
+      "penalty": 3,
+      "description": "Improvisa una rima de dos líneas sobre la persona a tu derecha. Si te trabas, bebes 3."
+    }
+  },
+  {
+    "id": "loc_012",
+    "category_id": "cat_loco_01",
+    "type": "CHALLENGE",
+    "content": {
+      "title": "Caminata Lunar",
+      "penalty": 2,
+      "description": "Intenta hacer el Moonwalk de Michael Jackson. Si das pena ajena, bebes 2."
+    }
+  },
+  {
+    "id": "loc_013",
+    "category_id": "cat_loco_01",
+    "type": "CHALLENGE",
+    "content": {
+      "title": "Risa Malvada",
+      "penalty": 2,
+      "description": "Haz tu mejor y más exagerada risa de villano de película. Si nadie se asusta, bebes 2."
+    }
+  },
+  {
+    "id": "loc_014",
+    "category_id": "cat_loco_01",
+    "type": "CHALLENGE",
+    "content": {
+      "title": "Modo Ópera",
+      "penalty": 4,
+      "description": "Canta tu siguiente frase como si fueras un cantante de ópera. Si te niegas, bebe 4."
+    }
+  },
+  {
+    "id": "loc_015",
+    "category_id": "cat_loco_01",
+    "type": "CHALLENGE",
+    "content": {
+      "title": "Sin Pulgares",
+      "penalty": 2,
+      "description": "Bebe tus próximos 2 tragos sosteniendo el vaso sin usar tus pulgares. Si se te cae, limpias tú."
+    }
+  },
+  {
+    "id": "loc_016",
+    "category_id": "cat_loco_01",
+    "type": "CHALLENGE",
+    "content": {
+      "title": "Abrazo Grupal",
+      "penalty": 2,
+      "description": "Dale un abrazo incómodamente largo a la persona a tu izquierda. Si se separan antes de 5 segundos, beben ambos."
+    }
+  },
+  {
+    "id": "loc_017",
+    "category_id": "cat_loco_01",
+    "type": "CHALLENGE",
+    "content": {
+      "title": "Sonido Animal",
+      "penalty": 3,
+      "description": "Haz el ruido del animal que elija el grupo. Si no suena nada parecido, bebes 3."
+    }
+  },
+  {
+    "id": "loc_018",
+    "category_id": "cat_loco_01",
+    "type": "CHALLENGE",
+    "content": {
+      "title": "Elogio Falso",
+      "penalty": 2,
+      "description": "Dile el cumplido más falso y sarcástico posible a alguien del grupo. Esa persona reparte 2 tragos."
+    }
+  },
+  {
+    "id": "loc_019",
+    "category_id": "cat_loco_01",
+    "type": "CHALLENGE",
+    "content": {
+      "title": "Trabalenguas",
+      "penalty": 2,
+      "description": "Di 'Tres tristes tigres tragaban trigo' 3 veces súper rápido. Si te equivocas, bebes 2."
+    }
+  },
+  {
+    "id": "loc_020",
+    "category_id": "cat_loco_01",
+    "type": "CHALLENGE",
+    "content": {
+      "title": "Pasarela",
+      "penalty": 3,
+      "description": "Camina por la habitación como modelo de pasarela. El grupo califica: si repruebas, bebes 3."
+    }
+  }
+]

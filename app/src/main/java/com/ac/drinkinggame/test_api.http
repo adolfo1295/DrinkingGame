@@ -1,2 +1,9 @@
-package com.ac.drinkinggame
+### Obtener Categorías
+GET https://aooxodjoarjrxipjdkmt.supabase.co/rest/v1/categories?select=*
+apikey: sb_publishable_dCEeriSrqHP9Jx10m3MnWg_J-F8Kcrm
+Authorization: Bearer sb_publishable_dCEeriSrqHP9Jx10m3MnWg_J-F8Kcrm
 
+### Obtener Cartas del Modo Loco
+GET https://aooxodjoarjrxipjdkmt.supabase.co/rest/v1/cards?select=*&category_id=eq.cat_loco_01
+apikey: sb_publishable_dCEeriSrqHP9Jx10m3MnWg_J-F8Kcrm
+Authorization: Bearer sb_publishable_dCEeriSrqHP9Jx10m3MnWg_J-F8Kcrm

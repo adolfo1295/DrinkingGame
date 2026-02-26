@@ -1,0 +1,44 @@
+[
+  {
+    "id": "cat_rompehielo_01",
+    "name": "Rompehielo",
+    "is_premium": false,
+    "version": "1.0"
+  },
+  {
+    "id": "cat_loco_01",
+    "name": "Loco",
+    "is_premium": false,
+    "version": "1.0"
+  },
+  {
+    "id": "cat_familiar_01",
+    "name": "Familiar",
+    "is_premium": false,
+    "version": "1.0"
+  },
+  {
+    "id": "cat_sabiondo_01",
+    "name": "Sabiondo",
+    "is_premium": true,
+    "version": "1.0"
+  },
+  {
+    "id": "cat_parejas_01",
+    "name": "Parejas",
+    "is_premium": true,
+    "version": "1.0"
+  },
+  {
+    "id": "cat_ninja_01",
+    "name": "Ninja",
+    "is_premium": true,
+    "version": "1.0"
+  },
+  {
+    "id": "cat_supervivencia_01",
+    "name": "Supervivencia",
+    "is_premium": true,
+    "version": "1.0"
+  }
+]

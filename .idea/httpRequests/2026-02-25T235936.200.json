@@ -1,0 +1,52 @@
+[
+  {
+    "id": "loc_001",
+    "category_id": "cat_loco_01",
+    "type": "CHALLENGE",
+    "content": {
+      "title": "Políglota",
+      "penalty": 3,
+      "description": "Habla con un acento extranjero exagerado hasta tu próximo turno. Si se te olvida o fallas, bebes 3."
+    }
+  },
+  {
+    "id": "loc_002",
+    "category_id": "cat_loco_01",
+    "type": "CHALLENGE",
+    "content": {
+      "title": "El Codo",
+      "penalty": 2,
+      "description": "Intenta lamerte el codo derecho. Si no puedes, bebes 2 tragos."
+    }
+  },
+  {
+    "id": "loc_003",
+    "category_id": "cat_loco_01",
+    "type": "CHALLENGE",
+    "content": {
+      "title": "Bailarín Estrella",
+      "penalty": 4,
+      "description": "Haz el baile del robot durante 10 segundos. Si te da pena y no lo haces, bebes 4."
+    }
+  },
+  {
+    "id": "loc_004",
+    "category_id": "cat_loco_01",
+    "type": "CHALLENGE",
+    "content": {
+      "title": "Comediante",
+      "penalty": 2,
+      "description": "Cuenta el peor chiste de papá que te sepas. Si nadie se ríe, bebes 2 tragos."
+    }
+  },
+  {
+    "id": "loc_005",
+    "category_id": "cat_loco_01",
+    "type": "CHALLENGE",
+    "content": {
+      "title": "Reflejos",
+      "penalty": 3,
+      "description": "¡Tóquense la nariz! El último en hacerlo bebe 3 tragos."
+    }
+  }
+]
