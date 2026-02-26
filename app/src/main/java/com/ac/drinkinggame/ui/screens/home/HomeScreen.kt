@@ -28,6 +28,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ac.drinkinggame.domain.model.Category
 import com.ac.drinkinggame.domain.model.Player
@@ -206,23 +207,31 @@ fun PlayersDialog(
 ) {
     var newPlayerName by remember { mutableStateOf("") }
 
-    Dialog(onDismissRequest = onDismiss) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false // Permite que el diálogo use más de la pantalla
+        )
+    ) {
         Card(
             modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(max = 550.dp),
+                .fillMaxWidth(0.92f) // Ocupa el 92% del ancho de la pantalla
+                .fillMaxHeight(0.8f), // Ocupa hasta el 80% de la altura de la pantalla
             shape = RoundedCornerShape(32.dp),
             colors = CardDefaults.cardColors(containerColor = NightclubCard),
             border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
         ) {
-            Column(modifier = Modifier.padding(28.dp)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(28.dp)
+            ) {
                 Text(
-                    "Participantes",
-                    style = MaterialTheme.typography.headlineSmall,
+                    "Participantes", 
+                    style = MaterialTheme.typography.headlineMedium, // Título un poco más grande
                     fontWeight = FontWeight.Black,
                     color = Color.White
                 )
-
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Row(

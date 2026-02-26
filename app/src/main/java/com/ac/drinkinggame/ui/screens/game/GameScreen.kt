@@ -93,9 +93,9 @@ private fun SuccessView(
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Turno del Jugador
         player?.let {
             Card(
                 colors = CardDefaults.cardColors(containerColor = SabiondoPrimary.copy(alpha = 0.15f)),
@@ -112,11 +112,13 @@ private fun SuccessView(
             }
         }
 
+        Spacer(modifier = Modifier.weight(1f)) // Espacio flexible arriba
+
+        // La Carta (Contenido Principal)
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
-                .padding(vertical = 24.dp),
+                .padding(vertical = 16.dp),
             colors = CardDefaults.cardColors(containerColor = NightclubCard),
             shape = RoundedCornerShape(40.dp),
             border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f)),
@@ -124,7 +126,7 @@ private fun SuccessView(
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxWidth()
                     .padding(32.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
@@ -143,7 +145,7 @@ private fun SuccessView(
                     listOf(list[0] as String, list[1] as Color, list[2] as String, list[3] as String, list[4] as Int)
                 }
 
-                // Badge tipo Pill con colores vibrantes
+                // Badge Pill
                 Surface(
                     color = color as Color,
                     shape = CircleShape
@@ -170,7 +172,6 @@ private fun SuccessView(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // Descripción con fuente aumentada ~15% (de 18sp a 22sp)
                 Text(
                     text = description as String,
                     style = MaterialTheme.typography.titleLarge.copy(fontSize = 22.sp),
@@ -198,6 +199,9 @@ private fun SuccessView(
             }
         }
 
+        Spacer(modifier = Modifier.weight(1.2f)) // Espacio flexible abajo (un poco más pesado para centrado óptico)
+
+        // Botón de Acción
         Button(
             onClick = onNext,
             modifier = Modifier
