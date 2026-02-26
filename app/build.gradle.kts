@@ -2,6 +2,7 @@ plugins {
   alias(libs.plugins.android.application)
   alias(libs.plugins.kotlin.compose)
   alias(libs.plugins.kotlin.serialization)
+  alias(libs.plugins.google.ksp)
 }
 
 android {
@@ -29,12 +30,16 @@ android {
     }
   }
   compileOptions {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
   }
   buildFeatures {
     compose = true
   }
+}
+
+kotlin {
+  jvmToolchain(17)
 }
 
 dependencies {
@@ -47,6 +52,25 @@ dependencies {
   implementation(libs.androidx.navigation3.runtime)
   implementation(libs.androidx.navigation3.ui)
   implementation(libs.kotlinx.serialization.json)
+
+  // Koin
+  implementation(libs.koin.android)
+  implementation(libs.koin.androidx.compose)
+
+  // Ktor
+  implementation(libs.ktor.client.core)
+  implementation(libs.ktor.client.okhttp)
+  implementation(libs.ktor.client.content.negotiation)
+  implementation(libs.ktor.serialization.kotlinx.json)
+
+  // Room
+  implementation(libs.androidx.room.runtime)
+  implementation(libs.androidx.room.ktx)
+  ksp(libs.androidx.room.compiler)
+
+  // DataStore
+  implementation(libs.androidx.datastore.preferences)
+
   implementation(platform(libs.androidx.compose.bom))
   implementation(libs.androidx.compose.ui)
   implementation(libs.androidx.compose.ui.graphics)
