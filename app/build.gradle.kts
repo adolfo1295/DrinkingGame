@@ -36,6 +36,11 @@ android {
   buildFeatures {
     compose = true
   }
+  packaging {
+    resources {
+      excludes += "/META-INF/{AL2.0,LGPL2.1,LICENSE.md,LICENSE-notice.md}"
+    }
+  }
 }
 
 kotlin {
@@ -56,6 +61,8 @@ dependencies {
   // Koin
   implementation(libs.koin.android)
   implementation(libs.koin.androidx.compose)
+  androidTestImplementation(libs.koin.test)
+  androidTestImplementation(libs.koin.test.junit4)
 
   // Ktor
   implementation(libs.ktor.client.core)
@@ -81,6 +88,7 @@ dependencies {
   testImplementation(libs.turbine)
   testImplementation(libs.kotlinx.coroutines.test)
   androidTestImplementation(libs.androidx.junit)
+  androidTestImplementation(libs.mockk)
   androidTestImplementation(libs.androidx.espresso.core)
   androidTestImplementation(platform(libs.androidx.compose.bom))
   androidTestImplementation(libs.androidx.compose.ui.test.junit4)

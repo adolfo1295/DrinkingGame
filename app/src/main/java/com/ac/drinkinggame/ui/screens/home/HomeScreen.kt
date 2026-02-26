@@ -19,6 +19,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -60,7 +61,9 @@ fun HomeScreen(
             
             IconButton(
                 onClick = { showPlayersDialog = true },
-                modifier = Modifier.size(56.dp) // Aumentamos el tamaño total del botón
+                modifier = Modifier
+                    .size(56.dp)
+                    .testTag("players_button")
             ) {
                 Icon(
                     imageVector = Icons.Default.Person, 
@@ -174,23 +177,26 @@ fun PlayersDialog(
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                Row(verticalAlignment = Alignment.CenterVertically) {
                     TextField(
                         value = newPlayerName,
                         onValueChange = { newPlayerName = it },
                         placeholder = { Text("Nombre") },
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier
+                            .weight(1f)
+                            .testTag("player_input"),
                         singleLine = true
                     )
-                    IconButton(onClick = { 
-                        if (newPlayerName.isNotBlank()) {
-                            onAddPlayer(newPlayerName)
-                            newPlayerName = ""
-                        }
-                    }) {
+                    IconButton(
+                        onClick = { 
+                            if (newPlayerName.isNotBlank()) {
+                                onAddPlayer(newPlayerName)
+                                newPlayerName = ""
+                            }
+                        },
+                        modifier = Modifier.testTag("add_player_confirm")
+                    ) {
                         Icon(Icons.Default.Add, contentDescription = "Añadir")
                     }
-                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
