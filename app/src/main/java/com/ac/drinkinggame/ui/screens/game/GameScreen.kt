@@ -1,8 +1,10 @@
 package com.ac.drinkinggame.ui.screens.game
 
 import androidx.compose.animation.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -18,67 +20,69 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ac.drinkinggame.domain.model.GameCard
-import com.ac.drinkinggame.ui.theme.*
+import com.ac.drinkinggame.ui.theme.FamiliarPrimary
+import com.ac.drinkinggame.ui.theme.LocoPrimary
+import com.ac.drinkinggame.ui.theme.NightclubCard
+import com.ac.drinkinggame.ui.theme.SabiondoPrimary
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GameScreen(
-  categoryId: String,
-  onBack: () -> Unit,
-  viewModel: GameViewModel = koinViewModel(),
-  modifier: Modifier = Modifier
+    categoryId: String,
+    onBack: () -> Unit,
+    viewModel: GameViewModel = koinViewModel(),
+    modifier: Modifier = Modifier
 ) {
-  val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-  LaunchedEffect(categoryId) {
-    viewModel.onIntent(GameIntent.LoadCards(categoryId))
-  }
-
-  Scaffold(
-    topBar = {
-      TopAppBar(
-        title = { },
-        navigationIcon = {
-          IconButton(onClick = onBack) {
-            Icon(
-              Icons.AutoMirrored.Filled.ArrowBack,
-              contentDescription = "Atrás",
-              tint = Color.White
-            )
-          }
-        },
-        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-      )
-    },
-    containerColor = MaterialTheme.colorScheme.background,
-    modifier = modifier
-  ) { padding ->
-    Box(
-      modifier = Modifier
-        .fillMaxSize()
-        .padding(padding)
-        .padding(24.dp),
-      contentAlignment = Alignment.Center
-    ) {
-      AnimatedContent(
-        targetState = state,
-        label = "game_content"
-      ) { targetState ->
-        when (targetState) {
-                              GameState.Loading -> LoadingView()
-                              is GameState.Success -> SuccessView(
-                                  card = targetState.currentCard,
-                                  player = targetState.currentPlayer,
-                                  onNext = { viewModel.onIntent(GameIntent.NextCard) }
-                              )
-                              GameState.Empty -> EmptyView(onRestart = onBack)
-          
-          is GameState.Error -> ErrorView(targetState.message)
-        }
-      }
+    LaunchedEffect(categoryId) {
+        viewModel.onIntent(GameIntent.LoadCards(categoryId))
     }
-  }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Atrás",
+                            tint = Color.White
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+            )
+        },
+        containerColor = MaterialTheme.colorScheme.background,
+        modifier = modifier
+    ) { padding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(24.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            AnimatedContent(
+                targetState = state,
+                label = "game_content"
+            ) { targetState ->
+                when (targetState) {
+                    GameState.Loading -> LoadingView()
+                    is GameState.Success -> SuccessView(
+                        card = targetState.currentCard,
+                        player = targetState.currentPlayer,
+                        onNext = { viewModel.onIntent(GameIntent.NextCard) }
+                    )
+                    GameState.Empty -> EmptyView(onRestart = onBack)
+                    is GameState.Error -> ErrorView(targetState.message)
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -93,163 +97,167 @@ private fun SuccessView(
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         player?.let {
-            Text(
-                text = "Turno de: ${it.name}",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = SabiondoPrimary,
-                modifier = Modifier.padding(bottom = 8.dp).testTag("player_name")
-            )
+            Card(
+                colors = CardDefaults.cardColors(containerColor = SabiondoPrimary.copy(alpha = 0.15f)),
+                shape = CircleShape,
+                border = BorderStroke(1.dp, SabiondoPrimary.copy(alpha = 0.3f))
+            ) {
+                Text(
+                    text = "Turno de: ${it.name}",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Black,
+                    color = SabiondoPrimary,
+                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp).testTag("player_name")
+                )
+            }
         }
 
         Card(
-
-      modifier = Modifier
-        .fillMaxWidth()
-        .weight(1f)
-        .padding(vertical = 32.dp),
-      colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-      shape = RoundedCornerShape(32.dp),
-      elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
-    ) {
-      Column(
-        modifier = Modifier
-          .fillMaxSize()
-          .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-      ) {
-        val title: String
-        val color: Color
-        val mainText: String
-        val description: String
-        val penalty: Int
-
-        when (card) {
-          is GameCard.Trivia -> {
-            title = "TRIVIA"
-            color = SabiondoPrimary
-            mainText = card.question
-            description = card.options?.joinToString("\n") ?: ""
-            penalty = card.penalty
-          }
-
-          is GameCard.Challenge -> {
-            title = "RETO"
-            color = LocoPrimary
-            mainText = card.title
-            description = card.description
-            penalty = card.penalty
-          }
-
-          is GameCard.Rule -> {
-            title = "REGLA"
-            color = FamiliarPrimary
-            mainText = card.title
-            description = card.rule
-            penalty = 0
-          }
-        }
-
-        Surface(
-          color = color.copy(alpha = 0.2f),
-          shape = RoundedCornerShape(8.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .padding(vertical = 24.dp),
+            colors = CardDefaults.cardColors(containerColor = NightclubCard),
+            shape = RoundedCornerShape(40.dp),
+            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f)),
+            elevation = CardDefaults.cardElevation(defaultElevation = 20.dp)
         ) {
-          Text(
-            text = title,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-            color = color,
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.Bold
-          )
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Text(
-          text = mainText,
-          style = MaterialTheme.typography.headlineMedium,
-          fontWeight = FontWeight.Bold,
-          textAlign = TextAlign.Center,
-          color = Color.White
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-          text = description,
-          style = MaterialTheme.typography.bodyLarge,
-          textAlign = TextAlign.Center,
-          color = Color.White.copy(alpha = 0.8f)
-        )
-
-        if (penalty > 0) {
-          Spacer(modifier = Modifier.height(48.dp))
-          Text(
-            text = "$penalty",
-            style = MaterialTheme.typography.displayMedium,
-            fontWeight = FontWeight.Black,
-            color = color
-          )
-          Text(
-            text = "TRAGOS DE CASTIGO",
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.Bold,
-            color = color.copy(alpha = 0.8f)
-          )
-        }
-      }
-    }
-
-            Button(
-                onClick = onNext,
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(64.dp)
-                    .testTag("next_card_button"),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                    .fillMaxSize()
+                    .padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                Text("¡ENTENDIDO!", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                val (title, color, mainText, description, penalty) = when (card) {
+                    is GameCard.Trivia -> {
+                        listOf("TRIVIA", SabiondoPrimary, card.question, card.options?.joinToString("\n") ?: "", card.penalty)
+                    }
+                    is GameCard.Challenge -> {
+                        listOf("RETO", LocoPrimary, card.title, card.description, card.penalty)
+                    }
+                    is GameCard.Rule -> {
+                        listOf("REGLA", FamiliarPrimary, card.title, card.rule, 0)
+                    }
+                }.let { list -> 
+                    listOf(list[0] as String, list[1] as Color, list[2] as String, list[3] as String, list[4] as Int)
+                }
+
+                // Badge tipo Pill con colores vibrantes
+                Surface(
+                    color = color as Color,
+                    shape = CircleShape
+                ) {
+                    Text(
+                        text = title as String,
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp),
+                        color = Color.Black,
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Black
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                Text(
+                    text = mainText as String,
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.ExtraBold,
+                    textAlign = TextAlign.Center,
+                    color = Color.White,
+                    lineHeight = 36.sp
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Descripción con fuente aumentada ~15% (de 18sp a 22sp)
+                Text(
+                    text = description as String,
+                    style = MaterialTheme.typography.titleLarge.copy(fontSize = 22.sp),
+                    textAlign = TextAlign.Center,
+                    color = Color.White.copy(alpha = 0.7f),
+                    lineHeight = 28.sp
+                )
+
+                if ((penalty as Int) > 0) {
+                    Spacer(modifier = Modifier.height(40.dp))
+                    Text(
+                        text = "$penalty",
+                        style = MaterialTheme.typography.displayLarge,
+                        fontWeight = FontWeight.Black,
+                        color = color
+                    )
+                    Text(
+                        text = "TRAGOS",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Black,
+                        color = color.copy(alpha = 0.7f),
+                        letterSpacing = 4.sp
+                    )
+                }
             }
-    
-  }
+        }
+
+        Button(
+            onClick = onNext,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(72.dp)
+                .testTag("next_card_button"),
+            shape = RoundedCornerShape(20.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+        ) {
+            Text("¡ENTENDIDO!", fontSize = 20.sp, fontWeight = FontWeight.Black)
+        }
+    }
 }
 
 @Composable
 private fun LoadingView() {
-  Column(horizontalAlignment = Alignment.CenterHorizontally) {
-    CircularProgressIndicator(color = SabiondoPrimary)
-    Spacer(modifier = Modifier.height(16.dp))
-    Text("Cargando cartas...", color = Color.White)
-  }
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        CircularProgressIndicator(color = SabiondoPrimary)
+        Spacer(modifier = Modifier.height(16.dp))
+        Text("Cargando cartas...", color = Color.White)
+    }
 }
 
 @Composable
 private fun EmptyView(onRestart: () -> Unit) {
-  Column(
-    modifier = Modifier.fillMaxSize(),
-    horizontalAlignment = Alignment.CenterHorizontally,
-    verticalArrangement = Arrangement.Center
-  ) {
-    Text("🎊", fontSize = 80.sp)
-    Text(
-      "¡Fin de la partida!",
-      style = MaterialTheme.typography.headlineMedium,
-      fontWeight = FontWeight.Bold,
-      color = Color.White
-    )
-    Spacer(modifier = Modifier.height(32.dp))
-    Button(onClick = onRestart) {
-      Text("Volver al inicio")
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text("🎊", fontSize = 120.sp)
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            "¡FIN DE LA PARTIDA!",
+            style = MaterialTheme.typography.displaySmall,
+            fontWeight = FontWeight.Black,
+            color = Color.White,
+            textAlign = TextAlign.Center
+        )
+        Text(
+            "Han sobrevivido una noche más.",
+            style = MaterialTheme.typography.bodyLarge,
+            color = Color.White.copy(alpha = 0.6f)
+        )
+        Spacer(modifier = Modifier.height(48.dp))
+        Button(
+            onClick = onRestart,
+            modifier = Modifier.fillMaxWidth().height(64.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color.White)
+        ) {
+            Text("VOLVER AL INICIO", color = Color.Black, fontWeight = FontWeight.Bold)
+        }
     }
-  }
 }
 
 @Composable
 private fun ErrorView(message: String) {
-  Column(horizontalAlignment = Alignment.CenterHorizontally) {
-    Text("Ocurrió un error", color = MaterialTheme.colorScheme.error)
-    Text(message, color = Color.White, textAlign = TextAlign.Center)
-  }
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text("Ocurrió un error", color = MaterialTheme.colorScheme.error)
+        Text(message, color = Color.White, textAlign = TextAlign.Center)
+    }
 }

@@ -19,3 +19,6 @@ val FamiliarPrimary = Color(0xFFF97316)
 
 val PenaltyRed = Color(0xFFEF4444)
 val SuccessGreen = Color(0xFF10B981)
+
+val NightclubCard = Color(0xFF1A243B)
+val NightclubSurface = Color(0xFF25314D)
