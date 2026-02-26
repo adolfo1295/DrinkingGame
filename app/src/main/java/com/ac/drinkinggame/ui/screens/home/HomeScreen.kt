@@ -177,15 +177,22 @@ fun PlayersDialog(
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                    TextField(
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedTextField(
                         value = newPlayerName,
                         onValueChange = { newPlayerName = it },
                         placeholder = { Text("Nombre") },
                         modifier = Modifier
                             .weight(1f)
                             .testTag("player_input"),
-                        singleLine = true
+                        singleLine = true,
+                        shape = RoundedCornerShape(12.dp)
                     )
+                    
                     IconButton(
                         onClick = { 
                             if (newPlayerName.isNotBlank()) {
@@ -193,10 +200,18 @@ fun PlayersDialog(
                                 newPlayerName = ""
                             }
                         },
-                        modifier = Modifier.testTag("add_player_confirm")
+                        modifier = Modifier
+                            .size(48.dp)
+                            .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp))
+                            .testTag("add_player_confirm")
                     ) {
-                        Icon(Icons.Default.Add, contentDescription = "Añadir")
+                        Icon(
+                            Icons.Default.Add, 
+                            contentDescription = "Añadir",
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
                     }
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
