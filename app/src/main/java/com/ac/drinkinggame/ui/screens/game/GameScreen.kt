@@ -65,13 +65,14 @@ fun GameScreen(
         label = "game_content"
       ) { targetState ->
         when (targetState) {
-          GameState.Loading -> LoadingView()
-          is GameState.Success -> SuccessView(
-            card = targetState.currentCard,
-            onNext = { viewModel.onIntent(GameIntent.NextCard) }
-          )
-
-          GameState.Empty -> EmptyView(onRestart = onBack)
+                              GameState.Loading -> LoadingView()
+                              is GameState.Success -> SuccessView(
+                                  card = targetState.currentCard,
+                                  player = targetState.currentPlayer,
+                                  onNext = { viewModel.onIntent(GameIntent.NextCard) }
+                              )
+                              GameState.Empty -> EmptyView(onRestart = onBack)
+          
           is GameState.Error -> ErrorView(targetState.message)
         }
       }
@@ -80,13 +81,28 @@ fun GameScreen(
 }
 
 @Composable
-private fun SuccessView(card: GameCard, onNext: () -> Unit) {
-  Column(
-    modifier = Modifier.fillMaxSize(),
-    horizontalAlignment = Alignment.CenterHorizontally,
-    verticalArrangement = Arrangement.SpaceBetween
-  ) {
-    Card(
+private fun SuccessView(
+    card: GameCard, 
+    player: com.ac.drinkinggame.domain.model.Player?, 
+    onNext: () -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween
+    ) {
+        player?.let {
+            Text(
+                text = "Turno de: ${it.name}",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                color = SabiondoPrimary,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+        }
+
+        Card(
+
       modifier = Modifier
         .fillMaxWidth()
         .weight(1f)

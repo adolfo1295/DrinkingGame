@@ -2,10 +2,13 @@ package com.ac.drinkinggame.ui.screens.game
 
 import app.cash.turbine.test
 import com.ac.drinkinggame.domain.model.GameCard
+import com.ac.drinkinggame.domain.repository.PlayerRepository
 import com.ac.drinkinggame.domain.usecase.GetCardsByCategoryUseCase
 import com.ac.drinkinggame.util.MainDispatcherRule
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -17,6 +20,9 @@ class GameViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private val getCardsByCategoryUseCase: GetCardsByCategoryUseCase = mockk()
+    private val playerRepository: PlayerRepository = mockk {
+        every { getPlayers() } returns flowOf(emptyList())
+    }
 
     @Test
     fun `LoadCards intent should update state to Success`() = runTest {
@@ -25,7 +31,7 @@ class GameViewModelTest {
             GameCard.Rule("1", "cat1", "Title", "Rule content", null)
         )
         coEvery { getCardsByCategoryUseCase("cat1") } returns Result.success(mockCards)
-        val viewModel = GameViewModel(getCardsByCategoryUseCase)
+        val viewModel = GameViewModel(getCardsByCategoryUseCase, playerRepository)
 
         // Then
         viewModel.uiState.test {
@@ -50,7 +56,7 @@ class GameViewModelTest {
             GameCard.Rule("2", "cat1", "Title 2", "Rule 2", null)
         )
         coEvery { getCardsByCategoryUseCase("cat1") } returns Result.success(mockCards)
-        val viewModel = GameViewModel(getCardsByCategoryUseCase)
+        val viewModel = GameViewModel(getCardsByCategoryUseCase, playerRepository)
 
         viewModel.uiState.test {
             // Loading

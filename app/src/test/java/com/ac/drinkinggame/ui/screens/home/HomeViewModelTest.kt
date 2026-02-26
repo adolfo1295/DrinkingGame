@@ -2,10 +2,13 @@ package com.ac.drinkinggame.ui.screens.home
 
 import app.cash.turbine.test
 import com.ac.drinkinggame.domain.model.Category
+import com.ac.drinkinggame.domain.repository.PlayerRepository
 import com.ac.drinkinggame.domain.usecase.GetCategoriesUseCase
 import com.ac.drinkinggame.util.MainDispatcherRule
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -17,6 +20,9 @@ class HomeViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private val getCategoriesUseCase: GetCategoriesUseCase = mockk()
+    private val playerRepository: PlayerRepository = mockk {
+        every { getPlayers() } returns flowOf(emptyList())
+    }
 
     @Test
     fun `initial state should be Loading and then Success when use case returns categories`() = runTest {
@@ -25,11 +31,11 @@ class HomeViewModelTest {
         coEvery { getCategoriesUseCase() } returns Result.success(mockCategories)
 
         // When
-        val viewModel = HomeViewModel(getCategoriesUseCase)
+        val viewModel = HomeViewModel(getCategoriesUseCase, playerRepository)
 
         // Then
         viewModel.uiState.test {
-            assertEquals(HomeState.Success(mockCategories), awaitItem())
+            assertEquals(HomeState.Success(mockCategories, emptyList()), awaitItem())
         }
     }
 
@@ -39,7 +45,7 @@ class HomeViewModelTest {
         coEvery { getCategoriesUseCase() } returns Result.failure(Exception("Error context"))
 
         // When
-        val viewModel = HomeViewModel(getCategoriesUseCase)
+        val viewModel = HomeViewModel(getCategoriesUseCase, playerRepository)
 
         // Then
         viewModel.uiState.test {
