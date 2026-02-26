@@ -9,16 +9,16 @@ import io.ktor.client.request.parameter
 
 class GameApiService(private val client: HttpClient) {
 
-    suspend fun getCategories(): Result<List<CategoryDto>> = runCatching {
-        client.get("categories") {
-            parameter("select", "*")
-        }.body()
-    }
+  suspend fun getCategories(): Result<List<CategoryDto>> = runCatching {
+    client.get("categories") {
+      parameter("select", "*")
+    }.body()
+  }
 
-    suspend fun getCardsByCategory(categoryId: String): Result<List<CardDto>> = runCatching {
-        client.get("cards") {
-            parameter("select", "*")
-            parameter("category_id", "eq.$categoryId")
-        }.body()
-    }
+  suspend fun getCardsByCategory(categoryId: String): Result<List<CardDto>> = runCatching {
+    client.get("cards") {
+      parameter("select", "*")
+      parameter("category_id", "eq.$categoryId")
+    }.body()
+  }
 }

@@ -5,9 +5,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 sealed interface Screen : NavKey {
-    @Serializable
-    data object CategorySelection : Screen
+  @Serializable
+  data object CategorySelection : Screen
 
-    @Serializable
-    data class Game(val categoryId: String) : Screen
+  @Serializable
+  data class Game(val categoryId: String) : Screen
 }

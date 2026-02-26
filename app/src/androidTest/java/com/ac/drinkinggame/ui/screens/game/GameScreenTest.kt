@@ -13,7 +13,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.androidx.viewmodel.dsl.viewModelOf
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -34,7 +34,7 @@ class GameScreenTest : KoinTest {
             modules(module {
                 single { getCardsByCategoryUseCase }
                 single { playerRepository }
-                viewModel { GameViewModel(get(), get()) }
+                viewModelOf(::GameViewModel)
             })
         }
     }
@@ -62,7 +62,7 @@ class GameScreenTest : KoinTest {
             }
         }
 
-        // Then: Verificar jugador y contenido del reto
+        // Then
         composeTestRule.onNodeWithTag("player_name").assertTextContains("Adolfo", substring = true)
         composeTestRule.onNodeWithText("Hacer 10 lagartijas").assertIsDisplayed()
         composeTestRule.onNodeWithText("3").assertIsDisplayed()
@@ -83,11 +83,8 @@ class GameScreenTest : KoinTest {
             }
         }
 
-        // When: Click en Entendido
         composeTestRule.onNodeWithTag("next_card_button").performClick()
-
-        // Then: Mostrar pantalla de fin
-        composeTestRule.onNodeWithText("¡Fin de la partida!").assertIsDisplayed()
+        composeTestRule.onNodeWithText("¡FIN DE LA PARTIDA!", substring = true).assertIsDisplayed()
     }
 
     @Test

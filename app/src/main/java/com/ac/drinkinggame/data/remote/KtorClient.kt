@@ -14,20 +14,20 @@ private const val SUPABASE_URL = "https://aooxodjoarjrxipjdkmt.supabase.co/rest/
 private const val SUPABASE_KEY = "sb_publishable_dCEeriSrqHP9Jx10m3MnWg_J-F8Kcrm"
 
 fun createKtorClient(): HttpClient {
-    return HttpClient(OkHttp) {
-        defaultRequest {
-            url(SUPABASE_URL)
-            header("apikey", SUPABASE_KEY)
-            header("Authorization", "Bearer $SUPABASE_KEY")
-            contentType(ContentType.Application.Json)
-        }
-        
-        install(ContentNegotiation) {
-            json(Json {
-                ignoreUnknownKeys = true
-                explicitNulls = false
-                encodeDefaults = true
-            })
-        }
+  return HttpClient(OkHttp) {
+    defaultRequest {
+      url(SUPABASE_URL)
+      header("apikey", SUPABASE_KEY)
+      header("Authorization", "Bearer $SUPABASE_KEY")
+      contentType(ContentType.Application.Json)
     }
+
+    install(ContentNegotiation) {
+      json(Json {
+        ignoreUnknownKeys = true
+        explicitNulls = false
+        encodeDefaults = true
+      })
+    }
+  }
 }

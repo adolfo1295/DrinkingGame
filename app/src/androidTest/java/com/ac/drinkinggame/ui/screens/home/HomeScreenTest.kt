@@ -13,7 +13,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.androidx.viewmodel.dsl.viewModelOf
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -27,7 +27,6 @@ class HomeScreenTest : KoinTest {
     private val getCategoriesUseCase: GetCategoriesUseCase = mockk()
     private val playerRepository: PlayerRepository = mockk()
     
-    // StateFlow para simular la base de datos reactiva de jugadores
     private val playersFlow = MutableStateFlow<List<Player>>(emptyList())
 
     @Before
@@ -37,11 +36,10 @@ class HomeScreenTest : KoinTest {
             modules(module {
                 single { getCategoriesUseCase }
                 single { playerRepository }
-                viewModel { HomeViewModel(get(), get()) }
+                viewModelOf(::HomeViewModel)
             })
         }
         
-        // Setup base de mocks
         coEvery { getCategoriesUseCase() } returns Result.success(
             listOf(
                 Category("1", "Gratis", false, "1.0"),
@@ -62,7 +60,8 @@ class HomeScreenTest : KoinTest {
             DrinkingGameTheme { HomeScreen(onCategorySelected = {}) }
         }
 
-        composeTestRule.onNodeWithText("Añade al menos un jugador para empezar").assertIsDisplayed()
+        // El texto cambió sutilmente en el refactor
+        composeTestRule.onNodeWithText("Se requiere al menos un jugador para iniciar el juego.", substring = true).assertIsDisplayed()
     }
 
     @Test
@@ -76,32 +75,22 @@ class HomeScreenTest : KoinTest {
             DrinkingGameTheme { HomeScreen(onCategorySelected = {}) }
         }
 
-        // Abrir diálogo
         composeTestRule.onNodeWithTag("players_button").performClick()
-        
-        // Escribir nombre
         composeTestRule.onNodeWithTag("player_input").performTextInput("Adolfo")
-        
-        // Confirmar
         composeTestRule.onNodeWithTag("add_player_confirm").performClick()
 
-        // Verificar que el nombre aparece en la lista dentro del diálogo
         composeTestRule.onNodeWithText("Adolfo").assertIsDisplayed()
     }
 
     @Test
     fun homeScreen_clickPremiumCategory_showsPaywall() {
-        // Añadimos un jugador para habilitar los clics
         playersFlow.value = listOf(Player("1", "User"))
 
         composeTestRule.setContent {
             DrinkingGameTheme { HomeScreen(onCategorySelected = {}) }
         }
 
-        // Clic en la categoría premium (la que tiene el candado)
         composeTestRule.onNodeWithText("Premium").performClick()
-
-        // Verificar que aparece el diálogo de Paywall
         composeTestRule.onNodeWithText("🚀 ¡Pásate a Premium!").assertIsDisplayed()
     }
 
@@ -116,10 +105,7 @@ class HomeScreenTest : KoinTest {
             }
         }
 
-        // Clic en categoría gratuita
         composeTestRule.onNodeWithText("Gratis").performClick()
-
-        // Verificar que la navegación se activó con el ID correcto
         assert(navigatedCategoryId == "1")
     }
 }

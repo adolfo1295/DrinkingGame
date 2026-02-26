@@ -9,10 +9,10 @@ import kotlinx.serialization.json.jsonPrimitive
 
 @Serializable
 data class CardDto(
-    val id: String,
-    @SerialName("category_id") val categoryId: String,
-    val type: String,
-    val content: CardContentDto
+  val id: String,
+  @SerialName("category_id") val categoryId: String,
+  val type: String,
+  val content: CardContentDto
 )
 
 @Serializable(with = CardContentSerializer::class)
@@ -20,24 +20,24 @@ sealed interface CardContentDto
 
 @Serializable
 data class TriviaContentDto(
-    val question: String,
-    val answer: String,
-    val options: List<String>? = null,
-    val penalty: Int
+  val question: String,
+  val answer: String,
+  val options: List<String>? = null,
+  val penalty: Int
 ) : CardContentDto
 
 @Serializable
 data class ChallengeContentDto(
-    val title: String,
-    val description: String,
-    val penalty: Int
+  val title: String,
+  val description: String,
+  val penalty: Int
 ) : CardContentDto
 
 @Serializable
 data class RuleContentDto(
-    val title: String,
-    val rule: String,
-    val duration: String? = null
+  val title: String,
+  val rule: String,
+  val duration: String? = null
 ) : CardContentDto
 
 /**
@@ -49,17 +49,18 @@ data class RuleContentDto(
  * Para solucionar el error 'null', ajustaremos el selector para que maneje la 
  * estructura interna o lanzaremos una excepción descriptiva.
  */
-object CardContentSerializer : JsonContentPolymorphicSerializer<CardContentDto>(CardContentDto::class) {
-    override fun selectDeserializer(element: JsonElement): kotlinx.serialization.DeserializationStrategy<CardContentDto> {
-        val jsonObject = element.jsonObject
-        
-        // Intentamos determinar el tipo por las llaves presentes en 'content' 
-        // ya que el 'type' está en el objeto padre (CardDto)
-        return when {
-            "question" in jsonObject -> TriviaContentDto.serializer()
-            "description" in jsonObject -> ChallengeContentDto.serializer()
-            "rule" in jsonObject -> RuleContentDto.serializer()
-            else -> throw Exception("No se pudo determinar el tipo de contenido. Llaves: ${jsonObject.keys}")
-        }
+object CardContentSerializer :
+  JsonContentPolymorphicSerializer<CardContentDto>(CardContentDto::class) {
+  override fun selectDeserializer(element: JsonElement): kotlinx.serialization.DeserializationStrategy<CardContentDto> {
+    val jsonObject = element.jsonObject
+
+    // Intentamos determinar el tipo por las llaves presentes en 'content'
+    // ya que el 'type' está en el objeto padre (CardDto)
+    return when {
+      "question" in jsonObject -> TriviaContentDto.serializer()
+      "description" in jsonObject -> ChallengeContentDto.serializer()
+      "rule" in jsonObject -> RuleContentDto.serializer()
+      else -> throw Exception("No se pudo determinar el tipo de contenido. Llaves: ${jsonObject.keys}")
     }
+  }
 }
