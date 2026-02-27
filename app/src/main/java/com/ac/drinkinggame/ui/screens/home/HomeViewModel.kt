@@ -33,6 +33,9 @@ class HomeViewModel(
   private val _uiState = MutableStateFlow<HomeState>(HomeState.Loading)
   val uiState: StateFlow<HomeState> = _uiState.asStateFlow()
 
+  // Flag para saber si ya intentamos la primera sincronización
+  private var isSyncCompleted = false
+
   init {
     loadData()
     syncData()
@@ -40,13 +43,18 @@ class HomeViewModel(
 
   private fun loadData() {
     viewModelScope.launch {
-      // Escuchamos de Room y DataStore combinados
       combine(
         getCategoriesUseCase(),
         playerRepository.getPlayers()
       ) { categories, players ->
-        val sortedCategories = categories.sortedBy { it.isPremium }
-        HomeState.Success(sortedCategories, players)
+        // Solo pasamos a Success si hay categorías O si la sincronización ya terminó
+        // Esto evita la pantalla vacía en el primer arranque
+        if (categories.isEmpty() && !isSyncCompleted) {
+          HomeState.Loading
+        } else {
+          val sortedCategories = categories.sortedBy { it.isPremium }
+          HomeState.Success(sortedCategories, players)
+        }
       }.collect { state ->
         _uiState.update { state }
       }
@@ -55,13 +63,17 @@ class HomeViewModel(
 
   private fun syncData() {
     viewModelScope.launch {
-      // Intentamos sincronizar en segundo plano
-      syncCategoriesUseCase().onFailure { error ->
-        // Si falla la red pero tenemos datos en Room, no mostramos error crítico
-        if (_uiState.value !is HomeState.Success) {
-          _uiState.update { HomeState.Error(error.message ?: "Sin conexión") }
+      syncCategoriesUseCase()
+        .onSuccess {
+          isSyncCompleted = true
+          // Al marcar isSyncCompleted, el combine de loadData reaccionará si Room seguía vacío
         }
-      }
+        .onFailure { error ->
+          isSyncCompleted = true
+          if (_uiState.value !is HomeState.Success) {
+            _uiState.update { HomeState.Error(error.message ?: "Sin conexión") }
+          }
+        }
     }
   }
 
