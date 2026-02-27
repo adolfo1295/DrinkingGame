@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.ac.drinkinggame.domain.model.Category
 import com.ac.drinkinggame.ui.components.CategoryCard
 import com.ac.drinkinggame.ui.components.PlayersDialog
 import com.ac.drinkinggame.ui.theme.SabiondoPrimary
@@ -36,7 +37,7 @@ fun HomeScreen(
 ) {
   val state by viewModel.uiState.collectAsStateWithLifecycle()
   var showPlayersDialog by remember { mutableStateOf(false) }
-  var showPremiumDialog by remember { mutableStateOf(false) }
+  var selectedPremiumCategory by remember { mutableStateOf<Category?>(null) }
 
   Scaffold(
     modifier = Modifier.fillMaxSize(),
@@ -114,20 +115,24 @@ fun HomeScreen(
               AnimatedVisibility(
                 visible = visible,
                 enter = slideInVertically { it / 2 } + fadeIn(),
-                modifier = Modifier.padding(top = (index / 2 * 10).dp) // Pequeño offset visual
+                modifier = Modifier.padding(top = (index / 2 * 10).dp)
               ) {
                 CategoryCard(
                   category = category,
                   onClick = {
                     if (s.players.isNotEmpty()) {
-                      if (category.isPremium) showPremiumDialog = true
-                      else onCategorySelected(category.id)
+                      if (category.isPremium) {
+                        selectedPremiumCategory = category
+                      } else {
+                        onCategorySelected(category.id)
+                      }
                     }
                   }
                 )
               }
             }
           }
+
           if (showPlayersDialog) {
             PlayersDialog(
               players = s.players,
@@ -137,8 +142,11 @@ fun HomeScreen(
             )
           }
 
-          if (showPremiumDialog) {
-            PremiumPaywallDialog(onDismiss = { showPremiumDialog = false })
+          selectedPremiumCategory?.let { category ->
+            PremiumPaywallDialog(
+              category = category,
+              onDismiss = { selectedPremiumCategory = null }
+            )
           }
         }
 
@@ -184,16 +192,16 @@ private fun PlayersAlert() {
 }
 
 @Composable
-private fun PremiumPaywallDialog(onDismiss: () -> Unit) {
+fun PremiumPaywallDialog(category: Category, onDismiss: () -> Unit) {
   AlertDialog(
     onDismissRequest = onDismiss,
-    title = { Text("🚀 ¡Pásate a Premium!") },
+    title = { Text("🔓 Desbloquea ${category.name}") },
     text = {
-      Text("Desbloquea todos los modos de juego, cartas exclusivas y juega sin límites con tus amigos.")
+      Text("Consigue acceso permanente a todos los retos de la categoría ${category.name} por solo $${category.price}.")
     },
     confirmButton = {
       Button(onClick = onDismiss) {
-        Text("Ver Planes")
+        Text("Comprar por $${category.price}")
       }
     },
     dismissButton = {

@@ -27,7 +27,7 @@ class HomeViewModelTest {
     @Test
     fun `initial state should be Loading and then Success when use case returns categories`() = runTest {
         // Given
-        val mockCategories = listOf(Category("1", "Test", false, "1.0"))
+        val mockCategories = listOf(Category("1", "Test", false, 0.0, "1.0"))
         coEvery { getCategoriesUseCase() } returns Result.success(mockCategories)
 
         // When

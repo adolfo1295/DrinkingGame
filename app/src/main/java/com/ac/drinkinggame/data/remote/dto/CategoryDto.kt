@@ -8,5 +8,6 @@ data class CategoryDto(
   val id: String,
   val name: String,
   @SerialName("is_premium") val isPremium: Boolean,
+  val price: Double,
   val version: String
 )

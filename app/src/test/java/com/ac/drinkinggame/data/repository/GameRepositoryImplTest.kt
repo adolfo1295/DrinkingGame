@@ -18,7 +18,7 @@ class GameRepositoryImplTest {
     fun `getCategories should return success when api call is successful`() = runTest {
         // Given
         val mockDtos = listOf(
-            CategoryDto("1", "Trivia", false, "1.0")
+            CategoryDto("1", "Trivia", false, 0.0, "1.0")
         )
         coEvery { apiService.getCategories() } returns Result.success(mockDtos)
 

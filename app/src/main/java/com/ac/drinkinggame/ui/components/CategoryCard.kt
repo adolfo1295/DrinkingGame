@@ -20,6 +20,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ac.drinkinggame.domain.model.Category
+import com.ac.drinkinggame.ui.theme.LocoPrimary
 import com.ac.drinkinggame.ui.theme.NightclubCard
 
 @Composable
@@ -28,7 +29,7 @@ fun CategoryCard(category: Category, onClick: () -> Unit) {
   val isPressed by interactionSource.collectIsPressedAsState()
   val scale by animateFloatAsState(if (isPressed) 0.94f else 1f, label = "card_scale")
 
-  val borderColor = if (category.isPremium) Color(0xFFFFD700) else Color.White.copy(alpha = 0.1f)
+  val borderColor = if (category.isPremium) LocoPrimary else Color.White.copy(alpha = 0.1f)
   val containerColor = if (category.isPremium) NightclubCard.copy(alpha = 0.8f) else NightclubCard
 
   Card(
@@ -57,21 +58,21 @@ fun CategoryCard(category: Category, onClick: () -> Unit) {
             .fillMaxSize()
             .background(
               Brush.verticalGradient(
-                listOf(Color(0xFFFFD700).copy(alpha = 0.05f), Color.Transparent)
+                listOf(LocoPrimary.copy(alpha = 0.15f), Color.Transparent)
               )
             )
         )
         Surface(
-          color = Color(0xFFFFD700),
+          color = LocoPrimary,
           shape = RoundedCornerShape(bottomStart = 16.dp),
           modifier = Modifier.align(Alignment.TopEnd)
         ) {
           Text(
-            text = "🔒 PREMIUM",
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-            fontSize = 10.sp,
-            fontWeight = FontWeight.Black,
-            color = Color.Black
+            text = if (category.price > 0) "🔒 $${category.price}" else "🔒 PREMIUM",
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+            fontSize = 13.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = Color.White
           )
         }
       }

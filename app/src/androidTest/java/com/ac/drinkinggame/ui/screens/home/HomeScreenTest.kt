@@ -42,8 +42,8 @@ class HomeScreenTest : KoinTest {
         
         coEvery { getCategoriesUseCase() } returns Result.success(
             listOf(
-                Category("1", "Gratis", false, "1.0"),
-                Category("2", "Premium", true, "1.0")
+                Category("1", "Gratis", false, 0.0, "1.0"),
+                Category("2", "Premium", true, 9.99, "1.0")
             )
         )
         every { playerRepository.getPlayers() } returns playersFlow

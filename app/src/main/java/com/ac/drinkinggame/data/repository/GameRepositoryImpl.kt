@@ -27,6 +27,7 @@ fun CategoryDto.toDomain() = Category(
   id = id,
   name = name,
   isPremium = isPremium,
+  price = price,
   version = version
 )
 
