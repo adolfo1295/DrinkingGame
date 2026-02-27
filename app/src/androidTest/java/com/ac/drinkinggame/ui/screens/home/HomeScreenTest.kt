@@ -2,6 +2,8 @@ package com.ac.drinkinggame.ui.screens.home
 
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.test.platform.app.InstrumentationRegistry
+import com.ac.drinkinggame.R
 import com.ac.drinkinggame.domain.model.Category
 import com.ac.drinkinggame.domain.model.Player
 import com.ac.drinkinggame.domain.repository.PlayerRepository
@@ -23,92 +25,96 @@ import org.koin.test.KoinTest
 
 class HomeScreenTest : KoinTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+  @get:Rule
+  val composeTestRule = createComposeRule()
 
-    private val getCategoriesUseCase: GetCategoriesUseCase = mockk()
-    private val syncCategoriesUseCase: SyncCategoriesUseCase = mockk()
-    private val playerRepository: PlayerRepository = mockk()
-    
-    private val playersFlow = MutableStateFlow<List<Player>>(emptyList())
+  private val context = InstrumentationRegistry.getInstrumentation().targetContext
 
-    @Before
-    fun setup() {
-        stopKoin()
-        startKoin {
-            modules(module {
-                single { getCategoriesUseCase }
-                single { syncCategoriesUseCase }
-                single { playerRepository }
-                viewModelOf(::HomeViewModel)
-            })
-        }
-        
-        every { getCategoriesUseCase() } returns flowOf(
-            listOf(
-                Category("1", "Gratis", false, 0.0, "1.0"),
-                Category("2", "Premium", true, 9.99, "1.0")
-            )
-        )
-        coEvery { syncCategoriesUseCase() } returns Result.success(Unit)
-        every { playerRepository.getPlayers() } returns playersFlow
+  private val getCategoriesUseCase: GetCategoriesUseCase = mockk()
+  private val syncCategoriesUseCase: SyncCategoriesUseCase = mockk()
+  private val playerRepository: PlayerRepository = mockk()
+
+  private val playersFlow = MutableStateFlow<List<Player>>(emptyList())
+
+  @Before
+  fun setup() {
+    stopKoin()
+    startKoin {
+      modules(module {
+        single { getCategoriesUseCase }
+        single { syncCategoriesUseCase }
+        single { playerRepository }
+        viewModelOf(::HomeViewModel)
+      })
     }
 
-    @After
-    fun tearDown() {
-        stopKoin()
+    every { getCategoriesUseCase() } returns flowOf(
+      listOf(
+        Category("1", "Gratis", false, 0.0, "1.0"),
+        Category("2", "Premium", true, 9.99, "1.0")
+      )
+    )
+    coEvery { syncCategoriesUseCase() } returns Result.success(Unit)
+    every { playerRepository.getPlayers() } returns playersFlow
+  }
+
+  @After
+  fun tearDown() {
+    stopKoin()
+  }
+
+  @Test
+  fun homeScreen_noPlayers_showsWarningMessage() {
+    composeTestRule.setContent {
+      DrinkingGameTheme { HomeScreen(onCategorySelected = {}) }
+    }
+    val expectedMessage = context.getString(R.string.home_players_required)
+    composeTestRule.onNodeWithText(expectedMessage, substring = true).assertIsDisplayed()
+  }
+
+  @Test
+  fun homeScreen_addPlayerFlow_updatesUI() {
+    coEvery { playerRepository.addPlayer(any()) } answers {
+      val name = firstArg<String>()
+      playersFlow.value = playersFlow.value + Player("id", name)
     }
 
-    @Test
-    fun homeScreen_noPlayers_showsWarningMessage() {
-        composeTestRule.setContent {
-            DrinkingGameTheme { HomeScreen(onCategorySelected = {}) }
-        }
-        composeTestRule.onNodeWithText("Se requiere al menos un jugador para iniciar el juego.", substring = true).assertIsDisplayed()
+    composeTestRule.setContent {
+      DrinkingGameTheme { HomeScreen(onCategorySelected = {}) }
     }
 
-    @Test
-    fun homeScreen_addPlayerFlow_updatesUI() {
-        coEvery { playerRepository.addPlayer(any()) } answers {
-            val name = firstArg<String>()
-            playersFlow.value = playersFlow.value + Player("id", name)
-        }
+    composeTestRule.onNodeWithTag("players_button").performClick()
+    composeTestRule.onNodeWithTag("player_input").performTextInput("Adolfo")
+    composeTestRule.onNodeWithTag("add_player_confirm").performClick()
 
-        composeTestRule.setContent {
-            DrinkingGameTheme { HomeScreen(onCategorySelected = {}) }
-        }
+    composeTestRule.onNodeWithText("Adolfo").assertIsDisplayed()
+  }
 
-        composeTestRule.onNodeWithTag("players_button").performClick()
-        composeTestRule.onNodeWithTag("player_input").performTextInput("Adolfo")
-        composeTestRule.onNodeWithTag("add_player_confirm").performClick()
+  @Test
+  fun homeScreen_clickPremiumCategory_showsPaywall() {
+    playersFlow.value = listOf(Player("1", "User"))
 
-        composeTestRule.onNodeWithText("Adolfo").assertIsDisplayed()
+    composeTestRule.setContent {
+      DrinkingGameTheme { HomeScreen(onCategorySelected = {}) }
     }
 
-    @Test
-    fun homeScreen_clickPremiumCategory_showsPaywall() {
-        playersFlow.value = listOf(Player("1", "User"))
+    composeTestRule.onNodeWithText("Premium").performClick()
+    val expectedTitle = context.getString(R.string.premium_coming_soon_title)
+    composeTestRule.onNodeWithText(expectedTitle).assertIsDisplayed()
+  }
 
-        composeTestRule.setContent {
-            DrinkingGameTheme { HomeScreen(onCategorySelected = {}) }
-        }
+  @Test
+  fun homeScreen_clickFreeCategory_triggersNavigation() {
+    var navigatedCategoryId: String? = null
+    playersFlow.value = listOf(Player("1", "User"))
 
-        composeTestRule.onNodeWithText("Premium").performClick()
-        composeTestRule.onNodeWithText("🚧 ¡Próximamente!").assertIsDisplayed()
+    composeTestRule.setContent {
+      DrinkingGameTheme {
+        HomeScreen(onCategorySelected = { navigatedCategoryId = it })
+      }
     }
 
-    @Test
-    fun homeScreen_clickFreeCategory_triggersNavigation() {
-        var navigatedCategoryId: String? = null
-        playersFlow.value = listOf(Player("1", "User"))
-
-        composeTestRule.setContent {
-            DrinkingGameTheme {
-                HomeScreen(onCategorySelected = { navigatedCategoryId = it })
-            }
-        }
-
-        composeTestRule.onNodeWithText("Gratis").performClick()
-        assert(navigatedCategoryId == "1")
-    }
+    composeTestRule.onNodeWithText("Gratis").performClick()
+    assert(navigatedCategoryId == "1")
+  }
 }

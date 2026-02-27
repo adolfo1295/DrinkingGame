@@ -15,10 +15,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ac.drinkinggame.R
 import com.ac.drinkinggame.domain.model.Category
 import com.ac.drinkinggame.ui.theme.LocoPrimary
 import com.ac.drinkinggame.ui.theme.NightclubCard
@@ -68,7 +70,7 @@ fun CategoryCard(category: Category, onClick: () -> Unit) {
           modifier = Modifier.align(Alignment.TopEnd)
         ) {
           Text(
-            text = if (category.price > 0) "🔒 $${category.price}" else "🔒 PREMIUM",
+            text = if (category.price > 0) "🔒 $${category.price}" else stringResource(R.string.premium_label),
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
             fontSize = 13.sp,
             fontWeight = FontWeight.ExtraBold,

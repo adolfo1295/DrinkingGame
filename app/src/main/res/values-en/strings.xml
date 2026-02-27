@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">Drinking Game</string>
+    <string name="home_title">Drinking Game</string>
+    <string name="home_subtitle">Select a game mode</string>
+    <string name="home_players_required">At least one player is required to start the game.</string>
+    <string name="home_players_dialog_title">Participants</string>
+    <string name="home_players_dialog_placeholder">Player name</string>
+    <string name="home_players_dialog_button_ready">READY</string>
+    
+    <string name="game_player_turn">%1$s\'s turn</string>
+    <string name="game_card_understood">GOT IT!</string>
+    <string name="game_card_shuffling">SHUFFLING...</string>
+    <string name="game_loading_cards">Loading cards...</string>
+    <string name="game_error_title">An error occurred</string>
+    <string name="game_empty_title">GAME OVER!</string>
+    <string name="game_empty_subtitle">You survived another night.</string>
+    <string name="game_empty_button_back">BACK TO START</string>
+    <string name="game_penalty_label">DRINKS</string>
+    
+    <string name="premium_coming_soon_title">🚧 Coming Soon!</string>
+    <string name="premium_coming_soon_message">The %1$s category will be available in the next update. Get ready for new challenges!</string>
+    <string name="premium_coming_soon_button">I\'ll wait!</string>
+    <string name="premium_label">🔒 PREMIUM</string>
+</resources>

@@ -16,10 +16,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.ac.drinkinggame.R
 import com.ac.drinkinggame.domain.model.Player
 import com.ac.drinkinggame.ui.theme.NightclubCard
 import com.ac.drinkinggame.ui.theme.NightclubSurface
@@ -52,7 +54,7 @@ fun PlayersDialog(
           .padding(28.dp)
       ) {
         Text(
-          "Participantes",
+          text = stringResource(R.string.home_players_dialog_title),
           style = MaterialTheme.typography.headlineMedium,
           fontWeight = FontWeight.Black,
           color = Color.White
@@ -68,7 +70,7 @@ fun PlayersDialog(
           OutlinedTextField(
             value = newPlayerName,
             onValueChange = { newPlayerName = it },
-            placeholder = { Text("Nombre del jugador") },
+            placeholder = { Text(stringResource(R.string.home_players_dialog_placeholder)) },
             modifier = Modifier
               .weight(1f)
               .testTag("player_input"),
@@ -149,7 +151,11 @@ fun PlayersDialog(
           shape = RoundedCornerShape(16.dp),
           colors = ButtonDefaults.buttonColors(containerColor = Color.White)
         ) {
-          Text("LISTO", fontWeight = FontWeight.Black, color = Color.Black)
+          Text(
+            text = stringResource(R.string.home_players_dialog_button_ready),
+            fontWeight = FontWeight.Black,
+            color = Color.Black
+          )
         }
       }
     }

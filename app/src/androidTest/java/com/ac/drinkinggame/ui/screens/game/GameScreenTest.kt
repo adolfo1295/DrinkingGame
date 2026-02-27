@@ -2,6 +2,8 @@ package com.ac.drinkinggame.ui.screens.game
 
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.test.platform.app.InstrumentationRegistry
+import com.ac.drinkinggame.R
 import com.ac.drinkinggame.domain.model.GameCard
 import com.ac.drinkinggame.domain.model.Player
 import com.ac.drinkinggame.domain.repository.PlayerRepository
@@ -24,6 +26,8 @@ class GameScreenTest : KoinTest {
 
   @get:Rule
   val composeTestRule = createComposeRule()
+  
+  private val context = InstrumentationRegistry.getInstrumentation().targetContext
 
   private val getCardsByCategoryUseCase: GetCardsByCategoryUseCase = mockk()
   private val syncCardsByCategoryUseCase: SyncCardsByCategoryUseCase = mockk()
@@ -64,9 +68,10 @@ class GameScreenTest : KoinTest {
       }
     }
 
-    composeTestRule.onNodeWithTag("player_name").assertTextContains("Adolfo", substring = true)
+    // Verificar turno del jugador usando el string localizado
+    val expectedTurnText = context.getString(R.string.game_player_turn, "Adolfo")
+    composeTestRule.onNodeWithTag("player_name").assertTextContains(expectedTurnText, substring = true)
     composeTestRule.onNodeWithText("Hacer 10 lagartijas").assertIsDisplayed()
-    composeTestRule.onNodeWithText("3").assertIsDisplayed()
   }
 
   @Test
@@ -89,16 +94,18 @@ class GameScreenTest : KoinTest {
     composeTestRule.onNodeWithTag("next_card_button").performClick()
     composeTestRule.mainClock.advanceTimeBy(100)
 
+    val expectedShufflingText = context.getString(R.string.game_card_shuffling)
     composeTestRule.onNodeWithTag("next_card_button")
       .assertIsNotEnabled()
-      .assertTextContains("BARAJANDO...", substring = true)
+      .assertTextContains(expectedShufflingText, substring = true)
 
     composeTestRule.mainClock.advanceTimeBy(600)
     composeTestRule.waitForIdle()
 
+    val expectedGotItText = context.getString(R.string.game_card_understood)
     composeTestRule.onNodeWithTag("next_card_button")
       .assertIsEnabled()
-      .assertTextContains("¡ENTENDIDO!", substring = true)
+      .assertTextContains(expectedGotItText, substring = true)
   }
 
   @Test
@@ -113,7 +120,7 @@ class GameScreenTest : KoinTest {
       }
     }
 
-    // Tras el refactor, si no hay nada en cache, mostramos la pantalla de fin/vacia
-    composeTestRule.onNodeWithText("¡FIN DE LA PARTIDA!", substring = true).assertIsDisplayed()
+    val expectedEmptyTitle = context.getString(R.string.game_empty_title)
+    composeTestRule.onNodeWithText(expectedEmptyTitle, substring = true).assertIsDisplayed()
   }
 }

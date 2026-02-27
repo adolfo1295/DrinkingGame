@@ -13,10 +13,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ac.drinkinggame.R
 import com.ac.drinkinggame.domain.model.GameCard
 import com.ac.drinkinggame.domain.model.Player
 import com.ac.drinkinggame.ui.theme.FamiliarPrimary
@@ -52,7 +54,6 @@ fun SuccessView(
     modifier = Modifier.fillMaxSize(),
     horizontalAlignment = Alignment.CenterHorizontally
   ) {
-    // Turno del Jugador
     player?.let {
       Card(
         colors = CardDefaults.cardColors(containerColor = SabiondoPrimary.copy(alpha = 0.15f)),
@@ -60,7 +61,7 @@ fun SuccessView(
         border = BorderStroke(1.dp, SabiondoPrimary.copy(alpha = 0.3f))
       ) {
         Text(
-          text = "Turno de: ${it.name}",
+          text = stringResource(R.string.game_player_turn, it.name),
           style = MaterialTheme.typography.titleMedium,
           fontWeight = FontWeight.Black,
           color = SabiondoPrimary,
@@ -73,7 +74,6 @@ fun SuccessView(
 
     Spacer(modifier = Modifier.weight(1f))
 
-    // La Carta 3D
     Card(
       modifier = Modifier
         .fillMaxWidth()
@@ -106,7 +106,6 @@ fun SuccessView(
 
     Spacer(modifier = Modifier.weight(1.2f))
 
-    // Botón de Acción
     Button(
       onClick = onNext,
       enabled = !rotation.isRunning,
@@ -121,7 +120,11 @@ fun SuccessView(
       )
     ) {
       Text(
-        text = if (rotation.isRunning) "BARAJANDO..." else "¡ENTENDIDO!",
+        text = if (rotation.isRunning) {
+          stringResource(R.string.game_card_shuffling)
+        } else {
+          stringResource(R.string.game_card_understood)
+        },
         fontSize = 20.sp,
         fontWeight = FontWeight.Black
       )
@@ -195,7 +198,7 @@ private fun CardContent(card: GameCard) {
         color = color
       )
       Text(
-        text = "TRAGOS",
+        text = stringResource(R.string.game_penalty_label),
         style = MaterialTheme.typography.labelLarge,
         fontWeight = FontWeight.Black,
         color = color.copy(alpha = 0.7f),

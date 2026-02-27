@@ -20,10 +20,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.ac.drinkinggame.R
 import com.ac.drinkinggame.domain.model.Category
 import com.ac.drinkinggame.ui.components.CategoryCard
 import com.ac.drinkinggame.ui.components.PlayersDialog
@@ -56,7 +58,7 @@ fun HomeScreen(
         verticalAlignment = Alignment.CenterVertically
       ) {
         Text(
-          text = "Drinking Game",
+          text = stringResource(R.string.home_title),
           style = MaterialTheme.typography.displaySmall,
           fontWeight = FontWeight.Black,
           color = Color.White,
@@ -72,7 +74,7 @@ fun HomeScreen(
         ) {
           Icon(
             imageVector = Icons.Default.Person,
-            contentDescription = "Jugadores",
+            contentDescription = null,
             tint = Color.White,
             modifier = Modifier.size(30.dp)
           )
@@ -82,7 +84,7 @@ fun HomeScreen(
       Spacer(modifier = Modifier.height(8.dp))
 
       Text(
-        text = "Selecciona un modo de juego",
+        text = stringResource(R.string.home_subtitle),
         style = MaterialTheme.typography.titleMedium,
         color = Color.White.copy(alpha = 0.6f),
         modifier = Modifier.align(Alignment.Start)
@@ -182,7 +184,7 @@ private fun PlayersAlert() {
         modifier = Modifier.size(28.dp)
       )
       Text(
-        "Se requiere al menos un jugador para iniciar el juego.",
+        text = stringResource(R.string.home_players_required),
         style = MaterialTheme.typography.bodyMedium,
         fontWeight = FontWeight.Bold,
         color = MaterialTheme.colorScheme.onErrorContainer
@@ -195,13 +197,13 @@ private fun PlayersAlert() {
 fun PremiumPaywallDialog(category: Category, onDismiss: () -> Unit) {
   AlertDialog(
     onDismissRequest = onDismiss,
-    title = { Text("🚧 ¡Próximamente!") },
+    title = { Text(stringResource(R.string.premium_coming_soon_title)) },
     text = {
-      Text("La categoría ${category.name} estará disponible en la próxima actualización. ¡Prepárate para nuevos retos!")
+      Text(stringResource(R.string.premium_coming_soon_message, category.name))
     },
     confirmButton = {
       Button(onClick = onDismiss) {
-        Text("¡Lo esperaré!")
+        Text(stringResource(R.string.premium_coming_soon_button))
       }
     }
   )

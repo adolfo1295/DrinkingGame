@@ -7,10 +7,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ac.drinkinggame.R
 import com.ac.drinkinggame.ui.theme.SabiondoPrimary
 
 @Composable
@@ -18,7 +20,10 @@ fun LoadingView() {
   Column(horizontalAlignment = Alignment.CenterHorizontally) {
     CircularProgressIndicator(color = SabiondoPrimary)
     Spacer(modifier = Modifier.height(16.dp))
-    Text("Cargando cartas...", color = Color.White)
+    Text(
+      text = stringResource(R.string.game_loading_cards),
+      color = Color.White
+    )
   }
 }
 
@@ -32,27 +37,29 @@ fun EmptyView(onRestart: () -> Unit) {
     Text("🎊", fontSize = 120.sp)
     Spacer(modifier = Modifier.height(16.dp))
     Text(
-      "¡FIN DE LA PARTIDA!",
+      text = stringResource(R.string.game_empty_title),
       style = MaterialTheme.typography.displaySmall,
       fontWeight = FontWeight.Black,
       color = Color.White,
       textAlign = TextAlign.Center
     )
     Text(
-      "Han sobrevivido una noche más.",
+      text = stringResource(R.string.game_empty_subtitle),
       style = MaterialTheme.typography.bodyLarge,
       color = Color.White.copy(alpha = 0.6f)
     )
     Spacer(modifier = Modifier.height(48.dp))
     Button(
       onClick = onRestart,
-      modifier = Modifier
-        .fillMaxWidth()
-        .height(64.dp),
+      modifier = Modifier.fillMaxWidth().height(64.dp),
       shape = RoundedCornerShape(16.dp),
       colors = ButtonDefaults.buttonColors(containerColor = Color.White)
     ) {
-      Text("VOLVER AL INICIO", color = Color.Black, fontWeight = FontWeight.Bold)
+      Text(
+        text = stringResource(R.string.game_empty_button_back),
+        color = Color.Black,
+        fontWeight = FontWeight.Bold
+      )
     }
   }
 }
@@ -60,7 +67,14 @@ fun EmptyView(onRestart: () -> Unit) {
 @Composable
 fun ErrorView(message: String) {
   Column(horizontalAlignment = Alignment.CenterHorizontally) {
-    Text("Ocurrió un error", color = MaterialTheme.colorScheme.error)
-    Text(message, color = Color.White, textAlign = TextAlign.Center)
+    Text(
+      text = stringResource(R.string.game_error_title),
+      color = MaterialTheme.colorScheme.error
+    )
+    Text(
+      text = message,
+      color = Color.White,
+      textAlign = TextAlign.Center
+    )
   }
 }
