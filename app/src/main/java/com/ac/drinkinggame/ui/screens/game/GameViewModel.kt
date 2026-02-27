@@ -6,6 +6,7 @@ import com.ac.drinkinggame.domain.model.GameCard
 import com.ac.drinkinggame.domain.model.Player
 import com.ac.drinkinggame.domain.repository.PlayerRepository
 import com.ac.drinkinggame.domain.usecase.GetCardsByCategoryUseCase
+import com.ac.drinkinggame.domain.usecase.SyncCardsByCategoryUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,6 +33,7 @@ sealed interface GameIntent {
 
 class GameViewModel(
   private val getCardsByCategoryUseCase: GetCardsByCategoryUseCase,
+  private val syncCardsByCategoryUseCase: SyncCardsByCategoryUseCase,
   private val playerRepository: PlayerRepository
 ) : ViewModel() {
 
@@ -54,30 +56,29 @@ class GameViewModel(
     viewModelScope.launch {
       _uiState.update { GameState.Loading }
 
-      // Cargamos jugadores una sola vez al inicio del juego
+      // 1. Obtener jugadores
       players = playerRepository.getPlayers().first()
 
-      getCardsByCategoryUseCase(categoryId)
-        .onSuccess { cards ->
-          if (cards.isEmpty()) {
-            _uiState.update { GameState.Empty }
-          } else {
-            cardList = cards.shuffled() // Mezclamos para mayor diversión
-            currentIndex = 0
-            playerIndex = 0
-            updateState()
-          }
-        }
-        .onFailure { error ->
-          _uiState.update { GameState.Error(error.message ?: "Unknown Error") }
-        }
+      // 2. Intentar sincronizar primero para tener datos frescos
+      syncCardsByCategoryUseCase(categoryId)
+
+      // 3. Obtener datos de Room (ya sincronizados o cache) una sola vez
+      val cards = getCardsByCategoryUseCase(categoryId).first()
+      
+      if (cards.isEmpty()) {
+        _uiState.update { GameState.Empty }
+      } else {
+        cardList = cards.shuffled()
+        currentIndex = 0
+        playerIndex = 0
+        updateState()
+      }
     }
   }
 
   private fun nextCard() {
     if (currentIndex < cardList.size - 1) {
       currentIndex++
-      // Rotamos jugador
       if (players.isNotEmpty()) {
         playerIndex = (playerIndex + 1) % players.size
       }

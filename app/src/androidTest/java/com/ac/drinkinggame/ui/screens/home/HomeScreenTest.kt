@@ -6,9 +6,11 @@ import com.ac.drinkinggame.domain.model.Category
 import com.ac.drinkinggame.domain.model.Player
 import com.ac.drinkinggame.domain.repository.PlayerRepository
 import com.ac.drinkinggame.domain.usecase.GetCategoriesUseCase
+import com.ac.drinkinggame.domain.usecase.SyncCategoriesUseCase
 import com.ac.drinkinggame.ui.theme.DrinkingGameTheme
 import io.mockk.*
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -25,6 +27,7 @@ class HomeScreenTest : KoinTest {
     val composeTestRule = createComposeRule()
 
     private val getCategoriesUseCase: GetCategoriesUseCase = mockk()
+    private val syncCategoriesUseCase: SyncCategoriesUseCase = mockk()
     private val playerRepository: PlayerRepository = mockk()
     
     private val playersFlow = MutableStateFlow<List<Player>>(emptyList())
@@ -35,17 +38,19 @@ class HomeScreenTest : KoinTest {
         startKoin {
             modules(module {
                 single { getCategoriesUseCase }
+                single { syncCategoriesUseCase }
                 single { playerRepository }
                 viewModelOf(::HomeViewModel)
             })
         }
         
-        coEvery { getCategoriesUseCase() } returns Result.success(
+        every { getCategoriesUseCase() } returns flowOf(
             listOf(
                 Category("1", "Gratis", false, 0.0, "1.0"),
                 Category("2", "Premium", true, 9.99, "1.0")
             )
         )
+        coEvery { syncCategoriesUseCase() } returns Result.success(Unit)
         every { playerRepository.getPlayers() } returns playersFlow
     }
 
@@ -59,8 +64,6 @@ class HomeScreenTest : KoinTest {
         composeTestRule.setContent {
             DrinkingGameTheme { HomeScreen(onCategorySelected = {}) }
         }
-
-        // El texto cambió sutilmente en el refactor
         composeTestRule.onNodeWithText("Se requiere al menos un jugador para iniciar el juego.", substring = true).assertIsDisplayed()
     }
 

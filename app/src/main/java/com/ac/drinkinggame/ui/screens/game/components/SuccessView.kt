@@ -32,15 +32,19 @@ fun SuccessView(
 ) {
   val rotation = remember { Animatable(0f) }
   var displayedCard by remember { mutableStateOf(card) }
+  var isFirstLoad by remember { mutableStateOf(true) }
 
   LaunchedEffect(card.id) {
-    if (card.id != displayedCard.id) {
+    if (!isFirstLoad && card.id != displayedCard.id) {
       rotation.animateTo(
         targetValue = 180f,
         animationSpec = tween(durationMillis = 500)
       )
       displayedCard = card
       rotation.snapTo(0f)
+    } else {
+      displayedCard = card
+      isFirstLoad = false
     }
   }
 
@@ -102,10 +106,10 @@ fun SuccessView(
 
     Spacer(modifier = Modifier.weight(1.2f))
 
-    // Botón de Acción con bloqueo durante animación
+    // Botón de Acción
     Button(
       onClick = onNext,
-      enabled = !rotation.isRunning, // BLOQUEO: Evita clics rápidos mientras gira
+      enabled = !rotation.isRunning,
       modifier = Modifier
         .fillMaxWidth()
         .height(72.dp)
@@ -136,30 +140,16 @@ private fun CardContent(card: GameCard) {
   ) {
     val (title, color, mainText, description, penalty) = when (card) {
       is GameCard.Trivia -> {
-        listOf(
-          "TRIVIA",
-          SabiondoPrimary,
-          card.question,
-          card.options?.joinToString("\n") ?: "",
-          card.penalty
-        )
+        listOf("TRIVIA", SabiondoPrimary, card.question, card.options?.joinToString("\n") ?: "", card.penalty)
       }
-
       is GameCard.Challenge -> {
         listOf("RETO", LocoPrimary, card.title, card.description, card.penalty)
       }
-
       is GameCard.Rule -> {
         listOf("REGLA", FamiliarPrimary, card.title, card.rule, 0)
       }
     }.let { list ->
-      listOf(
-        list[0] as String,
-        list[1] as Color,
-        list[2] as String,
-        list[3] as String,
-        list[4] as Int
-      )
+      listOf(list[0] as String, list[1] as Color, list[2] as String, list[3] as String, list[4] as Int)
     }
 
     Surface(

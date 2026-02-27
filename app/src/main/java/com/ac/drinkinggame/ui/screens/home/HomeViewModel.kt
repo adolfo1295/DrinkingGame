@@ -6,9 +6,11 @@ import com.ac.drinkinggame.domain.model.Category
 import com.ac.drinkinggame.domain.model.Player
 import com.ac.drinkinggame.domain.repository.PlayerRepository
 import com.ac.drinkinggame.domain.usecase.GetCategoriesUseCase
+import com.ac.drinkinggame.domain.usecase.SyncCategoriesUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -24,6 +26,7 @@ sealed interface HomeState {
 
 class HomeViewModel(
   private val getCategoriesUseCase: GetCategoriesUseCase,
+  private val syncCategoriesUseCase: SyncCategoriesUseCase,
   private val playerRepository: PlayerRepository
 ) : ViewModel() {
 
@@ -32,22 +35,32 @@ class HomeViewModel(
 
   init {
     loadData()
+    syncData()
   }
 
   private fun loadData() {
     viewModelScope.launch {
-      _uiState.update { HomeState.Loading }
+      // Escuchamos de Room y DataStore combinados
+      combine(
+        getCategoriesUseCase(),
+        playerRepository.getPlayers()
+      ) { categories, players ->
+        val sortedCategories = categories.sortedBy { it.isPremium }
+        HomeState.Success(sortedCategories, players)
+      }.collect { state ->
+        _uiState.update { state }
+      }
+    }
+  }
 
-      // Combinamos la carga de categorías con la escucha reactiva de jugadores
-      playerRepository.getPlayers().collect { players ->
-        getCategoriesUseCase()
-          .onSuccess { categories ->
-            val sortedCategories = categories.sortedBy { it.isPremium }
-            _uiState.update { HomeState.Success(sortedCategories, players) }
-          }
-          .onFailure { error ->
-            _uiState.update { HomeState.Error(error.message ?: "Error al cargar datos") }
-          }
+  private fun syncData() {
+    viewModelScope.launch {
+      // Intentamos sincronizar en segundo plano
+      syncCategoriesUseCase().onFailure { error ->
+        // Si falla la red pero tenemos datos en Room, no mostramos error crítico
+        if (_uiState.value !is HomeState.Success) {
+          _uiState.update { HomeState.Error(error.message ?: "Sin conexión") }
+        }
       }
     }
   }

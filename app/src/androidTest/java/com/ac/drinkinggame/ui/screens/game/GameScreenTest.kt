@@ -6,6 +6,7 @@ import com.ac.drinkinggame.domain.model.GameCard
 import com.ac.drinkinggame.domain.model.Player
 import com.ac.drinkinggame.domain.repository.PlayerRepository
 import com.ac.drinkinggame.domain.usecase.GetCardsByCategoryUseCase
+import com.ac.drinkinggame.domain.usecase.SyncCardsByCategoryUseCase
 import com.ac.drinkinggame.ui.theme.DrinkingGameTheme
 import io.mockk.*
 import kotlinx.coroutines.flow.flowOf
@@ -25,6 +26,7 @@ class GameScreenTest : KoinTest {
   val composeTestRule = createComposeRule()
 
   private val getCardsByCategoryUseCase: GetCardsByCategoryUseCase = mockk()
+  private val syncCardsByCategoryUseCase: SyncCardsByCategoryUseCase = mockk()
   private val playerRepository: PlayerRepository = mockk()
 
   @Before
@@ -33,6 +35,7 @@ class GameScreenTest : KoinTest {
     startKoin {
       modules(module {
         single { getCardsByCategoryUseCase }
+        single { syncCardsByCategoryUseCase }
         single { playerRepository }
         viewModelOf(::GameViewModel)
       })
@@ -52,7 +55,8 @@ class GameScreenTest : KoinTest {
     )
 
     every { playerRepository.getPlayers() } returns flowOf(listOf(mockPlayer))
-    coEvery { getCardsByCategoryUseCase("cat1") } returns Result.success(mockCards)
+    every { getCardsByCategoryUseCase("cat1") } returns flowOf(mockCards)
+    coEvery { syncCardsByCategoryUseCase("cat1") } returns Result.success(Unit)
 
     composeTestRule.setContent {
       DrinkingGameTheme {
@@ -67,13 +71,13 @@ class GameScreenTest : KoinTest {
 
   @Test
   fun gameScreen_clickNext_disablesButtonDuringAnimation() {
-    // Given: Dos cartas para que haya un cambio real
     val mockCards = listOf(
       GameCard.Rule("id1", "cat1", "Regla 1", "Contenido 1", null),
       GameCard.Rule("id2", "cat1", "Regla 2", "Contenido 2", null)
     )
     every { playerRepository.getPlayers() } returns flowOf(emptyList())
-    coEvery { getCardsByCategoryUseCase("cat1") } returns Result.success(mockCards)
+    every { getCardsByCategoryUseCase("cat1") } returns flowOf(mockCards)
+    coEvery { syncCardsByCategoryUseCase("cat1") } returns Result.success(Unit)
 
     composeTestRule.setContent {
       DrinkingGameTheme {
@@ -81,34 +85,27 @@ class GameScreenTest : KoinTest {
       }
     }
 
-    // Detenemos el reloj automático para controlar la animación manualmente
     composeTestRule.mainClock.autoAdvance = false
-
-    // When: Hacemos clic en el botón
     composeTestRule.onNodeWithTag("next_card_button").performClick()
-
-    // Avanzamos un poco de tiempo (ej. 100ms de los 500ms que dura el giro)
     composeTestRule.mainClock.advanceTimeBy(100)
 
-    // Then: El botón debe estar deshabilitado y mostrando el texto de carga
     composeTestRule.onNodeWithTag("next_card_button")
       .assertIsNotEnabled()
       .assertTextContains("BARAJANDO...", substring = true)
 
-    // Avanzamos hasta el final de la animación (más de 500ms)
     composeTestRule.mainClock.advanceTimeBy(600)
     composeTestRule.waitForIdle()
 
-    // Then: El botón debe habilitarse de nuevo
     composeTestRule.onNodeWithTag("next_card_button")
       .assertIsEnabled()
       .assertTextContains("¡ENTENDIDO!", substring = true)
   }
 
   @Test
-  fun gameScreen_showsErrorViewWhenApiFails() {
+  fun gameScreen_showsEmptyViewWhenApiFailsAndNoCache() {
     every { playerRepository.getPlayers() } returns flowOf(emptyList())
-    coEvery { getCardsByCategoryUseCase("cat1") } returns Result.failure(Exception("Error de red"))
+    every { getCardsByCategoryUseCase("cat1") } returns flowOf(emptyList())
+    coEvery { syncCardsByCategoryUseCase("cat1") } returns Result.failure(Exception("Error de red"))
 
     composeTestRule.setContent {
       DrinkingGameTheme {
@@ -116,7 +113,7 @@ class GameScreenTest : KoinTest {
       }
     }
 
-    composeTestRule.onNodeWithText("Ocurrió un error").assertIsDisplayed()
-    composeTestRule.onNodeWithText("Error de red").assertIsDisplayed()
+    // Tras el refactor, si no hay nada en cache, mostramos la pantalla de fin/vacia
+    composeTestRule.onNodeWithText("¡FIN DE LA PARTIDA!", substring = true).assertIsDisplayed()
   }
 }

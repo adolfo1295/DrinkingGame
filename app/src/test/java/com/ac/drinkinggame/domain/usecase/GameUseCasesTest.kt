@@ -1,10 +1,11 @@
 package com.ac.drinkinggame.domain.usecase
 
 import com.ac.drinkinggame.domain.repository.GameRepository
-import io.mockk.coEvery
-import io.mockk.mockk
+import io.mockk.*
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertTrue
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class GameUseCasesTest {
@@ -13,14 +14,16 @@ class GameUseCasesTest {
     private val getCategoriesUseCase = GetCategoriesUseCase(repository)
 
     @Test
-    fun `GetCategoriesUseCase should call repository`() = runTest {
+    fun `GetCategoriesUseCase should call repository and return flow`() = runTest {
         // Given
-        coEvery { repository.getCategories() } returns Result.success(emptyList())
+        val mockCategories = emptyList<com.ac.drinkinggame.domain.model.Category>()
+        every { repository.getCategories() } returns flowOf(mockCategories)
 
         // When
-        val result = getCategoriesUseCase()
+        val result = getCategoriesUseCase().first()
 
         // Then
-        assertTrue(result.isSuccess)
+        assertEquals(mockCategories, result)
+        verify { repository.getCategories() }
     }
 }
