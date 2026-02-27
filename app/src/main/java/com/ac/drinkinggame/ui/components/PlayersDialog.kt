@@ -123,19 +123,20 @@ fun PlayersDialog(
                   color = Color.White,
                   fontWeight = FontWeight.Medium
                 )
-                IconButton(
-                  onClick = { onRemovePlayer(player.id) },
-                  modifier = Modifier
-                    .size(48.dp)
-                    .background(MaterialTheme.colorScheme.error.copy(alpha = 0.15f), CircleShape)
-                ) {
-                  Icon(
-                    Icons.Default.Delete,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.size(24.dp)
-                  )
-                }
+                                                IconButton(
+                                                    onClick = { onRemovePlayer(player.id) },
+                                                    modifier = Modifier
+                                                        .size(48.dp)
+                                                        .background(Color.White.copy(alpha = 0.1f), CircleShape)
+                                                ) {
+                                                    Icon(
+                                                        Icons.Default.Delete, 
+                                                        contentDescription = null, 
+                                                        tint = Color.White,
+                                                        modifier = Modifier.size(24.dp)
+                                                    )
+                                                }
+                
               }
             }
           }
