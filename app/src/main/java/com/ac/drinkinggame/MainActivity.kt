@@ -11,6 +11,8 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
@@ -21,6 +23,7 @@ import com.ac.drinkinggame.ui.theme.DrinkingGameTheme
 
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
+    installSplashScreen()
     super.onCreate(savedInstanceState)
     enableEdgeToEdge()
     setContent {
@@ -46,10 +49,12 @@ fun MainNavigation() {
       }
     },
     transitionSpec = {
-      (slideInHorizontally { it } + fadeIn()) togetherWith (slideOutHorizontally { -it } + fadeOut())
+      (slideInHorizontally { it } + fadeIn()) togetherWith
+        (slideOutHorizontally { -it } + fadeOut())
     },
     popTransitionSpec = {
-      (slideInHorizontally { -it } + fadeIn()) togetherWith (slideOutHorizontally { it } + fadeOut())
+      (slideInHorizontally { -it } + fadeIn()) togetherWith
+        (slideOutHorizontally { it } + fadeOut())
     },
     entryProvider = entryProvider {
       entry<Screen.CategorySelection> {

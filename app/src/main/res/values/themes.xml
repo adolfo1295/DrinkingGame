@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <style name="Theme.DrinkingGame" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/slate_dark</item>
+        <!-- Como no hay icono aún, el sistema usará el icono de la app por defecto o nada -->
+        <item name="postSplashScreenTheme">@style/Theme.DrinkingGame</item>
+    </style>
 </resources>

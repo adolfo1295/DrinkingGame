@@ -64,6 +64,7 @@ dependencies {
   implementation(libs.androidx.lifecycle.viewmodel.navigation3)
   implementation(libs.androidx.activity.compose)
   implementation(libs.androidx.foundation)
+  implementation(libs.core.splashscreen)
   implementation(libs.androidx.navigation3.runtime)
   implementation(libs.androidx.navigation3.ui)
   implementation(libs.kotlinx.serialization.json)
