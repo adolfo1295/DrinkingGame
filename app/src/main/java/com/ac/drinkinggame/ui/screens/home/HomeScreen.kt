@@ -35,7 +35,8 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun HomeScreen(
   onCategorySelected: (String) -> Unit,
-  viewModel: HomeViewModel = koinViewModel()
+  viewModel: HomeViewModel = koinViewModel(),
+  columns: Int = 1
 ) {
   val state by viewModel.uiState.collectAsStateWithLifecycle()
   var showPlayersDialog by remember { mutableStateOf(false) }
@@ -103,7 +104,7 @@ fun HomeScreen(
           }
 
           LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
+            columns = GridCells.Fixed(columns),
             verticalArrangement = Arrangement.spacedBy(20.dp),
             horizontalArrangement = Arrangement.spacedBy(20.dp),
             modifier = Modifier.fillMaxWidth()
@@ -117,7 +118,7 @@ fun HomeScreen(
               AnimatedVisibility(
                 visible = visible,
                 enter = slideInVertically { it / 2 } + fadeIn(),
-                modifier = Modifier.padding(top = (index / 2 * 10).dp)
+                modifier = Modifier.padding(top = (index / columns * 10).dp)
               ) {
                 CategoryCard(
                   category = category,
