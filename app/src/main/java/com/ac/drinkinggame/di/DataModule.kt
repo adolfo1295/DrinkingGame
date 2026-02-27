@@ -24,7 +24,7 @@ val dataModule = module {
       androidContext(),
       AppDatabase::class.java,
       "drinking_game.db"
-    ).build()
+    ).fallbackToDestructiveMigration().build()
   }
   single { get<AppDatabase>().categoryDao() }
   single { get<AppDatabase>().cardDao() }

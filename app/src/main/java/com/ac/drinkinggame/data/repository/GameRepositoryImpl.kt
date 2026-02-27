@@ -10,6 +10,7 @@ import com.ac.drinkinggame.data.remote.dto.*
 import com.ac.drinkinggame.domain.model.Category
 import com.ac.drinkinggame.domain.model.GameCard
 import com.ac.drinkinggame.domain.repository.GameRepository
+import java.util.Locale
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.encodeToString
@@ -21,9 +22,11 @@ class GameRepositoryImpl(
   private val cardDao: CardDao
 ) : GameRepository {
 
+  private val isEnglish get() = Locale.getDefault().language == "en"
+
   override fun getCategories(): Flow<List<Category>> {
     return categoryDao.getCategories().map { entities ->
-      entities.map { it.toDomain() }
+      entities.map { it.toDomain(isEnglish) }
     }
   }
 
@@ -31,14 +34,17 @@ class GameRepositoryImpl(
     return cardDao.getCardsByCategory(categoryId).map { entities ->
       entities.map { entity ->
         val dto = Json.decodeFromString<CardDto>(entity.contentJson)
-        dto.toDomain()
+        dto.toDomain(isEnglish)
       }
     }
   }
 
   override suspend fun syncCategories(): Result<Unit> {
     return apiService.getCategories().map { dtos ->
-      categoryDao.insertCategories(dtos.map { it.toDomain().toEntity() })
+      categoryDao.insertCategories(dtos.map { dto ->
+        val category = dto.toDomain(isEnglish)
+        category.toEntity().copy(nameEn = dto.nameEn) // Persistimos el nombre en inglés en Room
+      })
       Unit
     }
   }
@@ -59,38 +65,37 @@ class GameRepositoryImpl(
   }
 }
 
-// Mappers faltantes que se perdieron en el refactor
-fun CategoryDto.toDomain() = Category(
+fun CategoryDto.toDomain(isEnglish: Boolean = false) = Category(
   id = id,
-  name = name,
+  name = if (isEnglish && nameEn != null) nameEn else name,
   isPremium = isPremium,
   price = price,
   version = version
 )
 
-fun CardDto.toDomain(): GameCard {
+fun CardDto.toDomain(isEnglish: Boolean = false): GameCard {
   return when (val c = content) {
     is TriviaContentDto -> GameCard.Trivia(
       id = id,
       categoryId = categoryId,
-      question = c.question,
-      answer = c.answer,
-      options = c.options,
+      question = if (isEnglish && c.questionEn != null) c.questionEn else c.question,
+      answer = if (isEnglish && c.answerEn != null) c.answerEn else c.answer,
+      options = if (isEnglish && c.optionsEn != null) c.optionsEn else c.options,
       penalty = c.penalty
     )
     is ChallengeContentDto -> GameCard.Challenge(
       id = id,
       categoryId = categoryId,
-      title = c.title,
-      description = c.description,
+      title = if (isEnglish && c.titleEn != null) c.titleEn else c.title,
+      description = if (isEnglish && c.descriptionEn != null) c.descriptionEn else c.description,
       penalty = c.penalty
     )
     is RuleContentDto -> GameCard.Rule(
       id = id,
       categoryId = categoryId,
-      title = c.title,
-      rule = c.rule,
-      duration = c.duration
+      title = if (isEnglish && c.titleEn != null) c.titleEn else c.title,
+      rule = if (isEnglish && c.ruleEn != null) c.ruleEn else c.rule,
+      duration = if (isEnglish && c.durationEn != null) c.durationEn else c.duration
     )
   }
 }

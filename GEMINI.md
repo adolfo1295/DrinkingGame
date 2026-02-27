@@ -22,6 +22,7 @@ Actúa como un Senior Android Staff Engineer con un enfoque pragmático. Tu obje
 - **Networking:** Ktor Client (Agnóstico a la plataforma).
 - **Serialización:** KotlinX Serialization (polimorfismo basado en el campo `type`).
 - **Persistencia:** Room Database (Offline-First, Repository Pattern). DataStore para preferencias.
+- **Database Consistency:** Al modificar DTOs o Entidades que afecten el esquema de Room, es OBLIGATORIO incrementar la versión en `AppDatabase` y, durante desarrollo, asegurar que `fallbackToDestructiveMigration()` esté habilitado para evitar crashes por inconsistencia de esquema.
 
 ## 3. Arquitectura de Directorios (Clean Architecture)
 El código fuente principal estará en `app/src/main/java/com/ac/drinkinggame/` dividido en:

@@ -21,41 +21,37 @@ sealed interface CardContentDto
 @Serializable
 data class TriviaContentDto(
   val question: String,
+  @SerialName("question_en") val questionEn: String? = null,
   val answer: String,
+  @SerialName("answer_en") val answerEn: String? = null,
   val options: List<String>? = null,
+  @SerialName("options_en") val optionsEn: List<String>? = null,
   val penalty: Int
 ) : CardContentDto
 
 @Serializable
 data class ChallengeContentDto(
   val title: String,
+  @SerialName("title_en") val titleEn: String? = null,
   val description: String,
+  @SerialName("description_en") val descriptionEn: String? = null,
   val penalty: Int
 ) : CardContentDto
 
 @Serializable
 data class RuleContentDto(
   val title: String,
+  @SerialName("title_en") val titleEn: String? = null,
   val rule: String,
-  val duration: String? = null
+  @SerialName("rule_en") val ruleEn: String? = null,
+  val duration: String? = null,
+  @SerialName("duration_en") val durationEn: String? = null
 ) : CardContentDto
 
-/**
- * Nota técnica: Supabase devuelve el JSON con el campo 'type' en la raíz.
- * Sin embargo, como 'content' es un objeto anidado, el serializador estándar 
- * de Kotlinx no tiene acceso al 'type' del padre fácilmente sin un custom serializer 
- * en el padre o una estructura aplanada. 
- * 
- * Para solucionar el error 'null', ajustaremos el selector para que maneje la 
- * estructura interna o lanzaremos una excepción descriptiva.
- */
 object CardContentSerializer :
   JsonContentPolymorphicSerializer<CardContentDto>(CardContentDto::class) {
   override fun selectDeserializer(element: JsonElement): kotlinx.serialization.DeserializationStrategy<CardContentDto> {
     val jsonObject = element.jsonObject
-
-    // Intentamos determinar el tipo por las llaves presentes en 'content'
-    // ya que el 'type' está en el objeto padre (CardDto)
     return when {
       "question" in jsonObject -> TriviaContentDto.serializer()
       "description" in jsonObject -> ChallengeContentDto.serializer()

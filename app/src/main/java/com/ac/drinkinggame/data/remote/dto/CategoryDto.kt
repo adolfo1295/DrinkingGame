@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 data class CategoryDto(
   val id: String,
   val name: String,
+  @SerialName("name_en") val nameEn: String? = null,
   @SerialName("is_premium") val isPremium: Boolean,
   val price: Double,
   val version: String

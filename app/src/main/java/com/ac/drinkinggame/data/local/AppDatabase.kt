@@ -9,7 +9,7 @@ import com.ac.drinkinggame.data.local.entity.CategoryEntity
 
 @Database(
   entities = [CategoryEntity::class, CardEntity::class],
-  version = 1,
+  version = 2,
   exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
