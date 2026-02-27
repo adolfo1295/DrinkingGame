@@ -195,18 +195,13 @@ private fun PlayersAlert() {
 fun PremiumPaywallDialog(category: Category, onDismiss: () -> Unit) {
   AlertDialog(
     onDismissRequest = onDismiss,
-    title = { Text("🔓 Desbloquea ${category.name}") },
+    title = { Text("🚧 ¡Próximamente!") },
     text = {
-      Text("Consigue acceso permanente a todos los retos de la categoría ${category.name} por solo $${category.price}.")
+      Text("La categoría ${category.name} estará disponible en la próxima actualización. ¡Prepárate para nuevos retos!")
     },
     confirmButton = {
       Button(onClick = onDismiss) {
-        Text("Comprar por $${category.price}")
-      }
-    },
-    dismissButton = {
-      TextButton(onClick = onDismiss) {
-        Text("Ahora no")
+        Text("¡Lo esperaré!")
       }
     }
   )

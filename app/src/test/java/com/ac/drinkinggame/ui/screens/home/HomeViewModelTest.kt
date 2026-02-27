@@ -11,6 +11,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
@@ -40,9 +41,13 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun `initial state should be Error when use case fails`() = runTest {
+    fun `categories should be sorted by premium status (free first)`() = runTest {
         // Given
-        coEvery { getCategoriesUseCase() } returns Result.failure(Exception("Error context"))
+        val mockCategories = listOf(
+            Category("1", "Premium", true, 9.99, "1.0"),
+            Category("2", "Free", false, 0.0, "1.0")
+        )
+        coEvery { getCategoriesUseCase() } returns Result.success(mockCategories)
 
         // When
         val viewModel = HomeViewModel(getCategoriesUseCase, playerRepository)
@@ -50,8 +55,10 @@ class HomeViewModelTest {
         // Then
         viewModel.uiState.test {
             val state = awaitItem()
-            assert(state is HomeState.Error)
-            assertEquals("Error context", (state as HomeState.Error).message)
+            assertTrue(state is HomeState.Success)
+            val categories = (state as HomeState.Success).categories
+            assertEquals("2", categories[0].id) // Free should be first
+            assertEquals("1", categories[1].id) // Premium should be second
         }
     }
 }

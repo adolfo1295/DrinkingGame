@@ -91,7 +91,7 @@ class HomeScreenTest : KoinTest {
         }
 
         composeTestRule.onNodeWithText("Premium").performClick()
-        composeTestRule.onNodeWithText("🚀 ¡Pásate a Premium!").assertIsDisplayed()
+        composeTestRule.onNodeWithText("🚧 ¡Próximamente!").assertIsDisplayed()
     }
 
     @Test

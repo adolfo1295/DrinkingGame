@@ -42,7 +42,8 @@ class HomeViewModel(
       playerRepository.getPlayers().collect { players ->
         getCategoriesUseCase()
           .onSuccess { categories ->
-            _uiState.update { HomeState.Success(categories, players) }
+            val sortedCategories = categories.sortedBy { it.isPremium }
+            _uiState.update { HomeState.Success(sortedCategories, players) }
           }
           .onFailure { error ->
             _uiState.update { HomeState.Error(error.message ?: "Error al cargar datos") }
