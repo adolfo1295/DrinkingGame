@@ -30,35 +30,49 @@ fun LoadingView() {
 @Composable
 fun EmptyView(onRestart: () -> Unit) {
   Column(
-    modifier = Modifier.fillMaxSize(),
+    modifier = Modifier
+      .fillMaxSize()
+      .padding(horizontal = 16.dp),
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.Center
   ) {
-    Text("🎊", fontSize = 120.sp)
-    Spacer(modifier = Modifier.height(16.dp))
+    Text("🍻", fontSize = 120.sp)
+    Spacer(modifier = Modifier.height(32.dp))
     Text(
       text = stringResource(R.string.game_empty_title),
-      style = MaterialTheme.typography.displaySmall,
+      style = MaterialTheme.typography.displayMedium,
       fontWeight = FontWeight.Black,
       color = Color.White,
-      textAlign = TextAlign.Center
+      textAlign = TextAlign.Center,
+      lineHeight = 48.sp,
+      letterSpacing = (-1).sp
     )
+    Spacer(modifier = Modifier.height(12.dp))
     Text(
       text = stringResource(R.string.game_empty_subtitle),
-      style = MaterialTheme.typography.bodyLarge,
-      color = Color.White.copy(alpha = 0.6f)
+      style = MaterialTheme.typography.titleLarge,
+      color = Color.White.copy(alpha = 0.6f),
+      textAlign = TextAlign.Center,
+      fontWeight = FontWeight.Medium
     )
-    Spacer(modifier = Modifier.height(48.dp))
+    Spacer(modifier = Modifier.height(64.dp))
     Button(
       onClick = onRestart,
-      modifier = Modifier.fillMaxWidth().height(64.dp),
-      shape = RoundedCornerShape(16.dp),
-      colors = ButtonDefaults.buttonColors(containerColor = Color.White)
+      modifier = Modifier
+        .fillMaxWidth()
+        .height(72.dp),
+      shape = RoundedCornerShape(24.dp),
+      colors = ButtonDefaults.buttonColors(
+        containerColor = SabiondoPrimary,
+        contentColor = Color.Black
+      ),
+      elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
     ) {
       Text(
         text = stringResource(R.string.game_empty_button_back),
-        color = Color.Black,
-        fontWeight = FontWeight.Bold
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.ExtraBold,
+        fontSize = 20.sp
       )
     }
   }

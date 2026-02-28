@@ -59,6 +59,10 @@ fun GameScreen(
     ) {
       AnimatedContent(
         targetState = state,
+        transitionSpec = {
+          (slideInHorizontally { it } + fadeIn()) togetherWith
+            (slideOutHorizontally { -it } + fadeOut())
+        },
         contentKey = { it::class }, // Usamos la clase como key para que Success sea estable
         label = "game_content"
       ) { targetState ->

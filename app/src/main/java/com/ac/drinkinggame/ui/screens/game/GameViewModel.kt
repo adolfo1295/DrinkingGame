@@ -56,22 +56,32 @@ class GameViewModel(
     viewModelScope.launch {
       _uiState.update { GameState.Loading }
 
-      // 1. Obtener jugadores
-      players = playerRepository.getPlayers().first()
+      // 1. Obtener jugadores (Solo la primera vez)
+      if (players.isEmpty()) {
+        players = playerRepository.getPlayers().first()
+      }
 
-      // 2. Intentar sincronizar primero para tener datos frescos
-      syncCardsByCategoryUseCase(categoryId)
+      // 2. Lanzar sincronización en background (Fire and Forget)
+      launch {
+        try {
+          syncCardsByCategoryUseCase(categoryId)
+        } catch (e: Exception) {
+          // Log error or handle gracefully
+        }
+      }
 
-      // 3. Obtener datos de Room (ya sincronizados o cache) una sola vez
-      val cards = getCardsByCategoryUseCase(categoryId).first()
-      
-      if (cards.isEmpty()) {
-        _uiState.update { GameState.Empty }
-      } else {
-        cardList = cards.shuffled()
-        currentIndex = 0
-        playerIndex = 0
-        updateState()
+      // 3. Suscribirse a los datos de Room
+      getCardsByCategoryUseCase(categoryId).collect { cards ->
+        if (cards.isNotEmpty() && cardList.isEmpty()) {
+          // Inicializar solo si no tenemos cartas cargadas aún
+          cardList = cards.shuffled()
+          currentIndex = 0
+          playerIndex = 0
+          updateState()
+        } else if (cards.isEmpty() && cardList.isEmpty()) {
+          // Si después de intentar cargar/sync no hay nada, mostrar Empty
+          _uiState.update { GameState.Empty }
+        }
       }
     }
   }
