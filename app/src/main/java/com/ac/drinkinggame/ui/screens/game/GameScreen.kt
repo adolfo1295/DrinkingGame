@@ -9,7 +9,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.unit.dp
@@ -39,8 +38,6 @@ fun getAuraAccentColor(styleKey: String?): Color {
 fun getCategoryColor(styleKey: String?): Color {
   val baseBackground = MaterialTheme.colorScheme.background
   val accentColor = getAuraAccentColor(styleKey)
-  
-  // Mezclamos el color neón (12% opacidad) sobre el fondo negro de la app
   return accentColor.copy(alpha = 0.12f).compositeOver(baseBackground)
 }
 
@@ -53,11 +50,15 @@ fun GameScreen(
   modifier: Modifier = Modifier
 ) {
   val state by viewModel.uiState.collectAsStateWithLifecycle()
-  val sessionConfig by viewModel.sessionConfig.collectAsStateWithLifecycle()
   
-  val sessionAccentColor = getAuraAccentColor(sessionConfig.styleKey)
-  val backgroundColor = if (sessionConfig.useNewGameUi) {
-    getCategoryColor(sessionConfig.styleKey)
+  // Extraemos la configuración visual del estado actual (si existe)
+  val successData = state as? GameState.Success
+  val useNewGameUi = successData?.useNewGameUi ?: false
+  val styleKey = successData?.styleKey
+  val sessionAccentColor = getAuraAccentColor(styleKey)
+  
+  val backgroundColor = if (useNewGameUi) {
+    getCategoryColor(styleKey)
   } else {
     MaterialTheme.colorScheme.background
   }
@@ -72,11 +73,7 @@ fun GameScreen(
         title = { },
         navigationIcon = {
           IconButton(onClick = onBack) {
-            Icon(
-              Icons.AutoMirrored.Filled.ArrowBack,
-              contentDescription = "Atrás",
-              tint = Color.White
-            )
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás", tint = Color.White)
           }
         },
         colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
@@ -86,35 +83,30 @@ fun GameScreen(
     modifier = modifier
   ) { padding ->
     Box(
-      modifier = Modifier
-        .fillMaxSize()
-        .padding(padding)
-        .padding(24.dp),
+      modifier = Modifier.fillMaxSize().padding(padding).padding(24.dp),
       contentAlignment = Alignment.Center
     ) {
       AnimatedContent(
         targetState = state,
-        transitionSpec = {
-          (slideInHorizontally { it } + fadeIn()) togetherWith
-            (slideOutHorizontally { -it } + fadeOut())
+        contentKey = { 
+          // Al usar sessionKey del propio estado Success, garantizamos atomicidad absoluta
+          if (it is GameState.Success) it.sessionKey else it::class 
         },
-        contentKey = { it::class }, // Usamos la clase como key para que Success sea estable
         label = "game_content"
       ) { targetState ->
-
         when (targetState) {
           GameState.Loading -> LoadingView(
-            color = if (sessionConfig.useNewGameUi) sessionAccentColor else SabiondoPrimary
+            color = if (useNewGameUi) sessionAccentColor else SabiondoPrimary
           )
           is GameState.Success -> SuccessView(
             card = targetState.currentCard,
             player = targetState.currentPlayer,
             onNext = { viewModel.onIntent(GameIntent.NextCard) },
             categoryId = categoryId,
-            useNewGameUi = sessionConfig.useNewGameUi,
-            sessionAccentColor = sessionAccentColor
+            useNewGameUi = targetState.useNewGameUi,
+            sessionAccentColor = sessionAccentColor,
+            sessionKey = targetState.sessionKey
           )
-
           GameState.Empty -> EmptyView(onRestart = onBack)
           is GameState.Error -> ErrorView(targetState.message)
         }
