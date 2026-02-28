@@ -34,7 +34,7 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun HomeScreen(
-  onCategorySelected: (String) -> Unit,
+  onCategorySelected: (String, String?) -> Unit,
   viewModel: HomeViewModel = koinViewModel(),
   columns: Int = 2
 ) {
@@ -127,7 +127,7 @@ fun HomeScreen(
                       if (category.isPremium) {
                         selectedPremiumCategory = category
                       } else {
-                        onCategorySelected(category.id)
+                        onCategorySelected(category.id, category.styleKey)
                       }
                     }
                   }

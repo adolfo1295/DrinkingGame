@@ -9,5 +9,5 @@ sealed interface Screen : NavKey {
   data object CategorySelection : Screen
 
   @Serializable
-  data class Game(val categoryId: String) : Screen
+  data class Game(val categoryId: String, val styleKey: String? = null) : Screen
 }

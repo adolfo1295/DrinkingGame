@@ -59,8 +59,8 @@ fun MainNavigation() {
     entryProvider = entryProvider {
       entry<Screen.CategorySelection> {
         HomeScreen(
-          onCategorySelected = { categoryId ->
-            backStack.add(Screen.Game(categoryId))
+          onCategorySelected = { categoryId, styleKey ->
+            backStack.add(Screen.Game(categoryId, styleKey))
           }
         )
       }
@@ -68,6 +68,7 @@ fun MainNavigation() {
       entry<Screen.Game> { key ->
         GameScreen(
           categoryId = key.categoryId,
+          initialStyleKey = key.styleKey,
           onBack = {
             if (backStack.size > 1) {
               backStack.removeAt(backStack.size - 1)

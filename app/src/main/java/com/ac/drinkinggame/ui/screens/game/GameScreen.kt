@@ -47,18 +47,23 @@ fun GameScreen(
   categoryId: String,
   onBack: () -> Unit,
   viewModel: GameViewModel = koinViewModel(),
+  initialStyleKey: String? = null, // Recibido por navegación
   modifier: Modifier = Modifier
 ) {
   val state by viewModel.uiState.collectAsStateWithLifecycle()
   
-  // Extraemos la configuración visual del estado actual (si existe)
+  // Extraemos la configuración visual del estado actual o de la navegación
   val successData = state as? GameState.Success
-  val useNewGameUi = successData?.useNewGameUi ?: false
-  val styleKey = successData?.styleKey
-  val sessionAccentColor = getAuraAccentColor(styleKey)
+  val currentStyleKey = successData?.styleKey ?: initialStyleKey
   
+  // Si tenemos un styleKey (ya sea inicial o de éxito), habilitamos la tintura
+  // Nota: Podríamos pasar también el flag por navegación si fuera necesario, 
+  // pero por ahora inferimos que si hay estilo, queremos el diseño nuevo.
+  val useNewGameUi = successData?.useNewGameUi ?: (initialStyleKey != null)
+  
+  val sessionAccentColor = getAuraAccentColor(currentStyleKey)
   val backgroundColor = if (useNewGameUi) {
-    getCategoryColor(styleKey)
+    getCategoryColor(currentStyleKey)
   } else {
     MaterialTheme.colorScheme.background
   }

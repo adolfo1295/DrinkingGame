@@ -1,6 +1,5 @@
 package com.ac.drinkinggame.ui.screens.game
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ac.drinkinggame.domain.model.GameCard
@@ -24,7 +23,6 @@ sealed interface GameState {
     val currentCard: GameCard,
     val currentPlayer: Player?,
     val hasMore: Boolean,
-    // Configuración visual integrada para garantizar atomicidad
     val sessionKey: String,
     val styleKey: String?,
     val useNewGameUi: Boolean
@@ -50,14 +48,11 @@ class GameViewModel(
   private val _uiState = MutableStateFlow<GameState>(GameState.Loading)
   val uiState: StateFlow<GameState> = _uiState.asStateFlow()
 
-  // Estado interno de la sesión
   private var cardList = listOf<GameCard>()
   private var players = listOf<Player>()
   private var currentIndex = 0
   private var playerIndex = 0
-  private var nextClickCount = 0
   
-  // Cache de configuración de sesión
   private var currentSessionKey = ""
   private var currentStyleKey: String? = null
   private var isNewUiEnabled = false
@@ -65,28 +60,21 @@ class GameViewModel(
   fun onIntent(intent: GameIntent) {
     when (intent) {
       is GameIntent.LoadCards -> loadCards(intent.categoryId)
-      GameIntent.NextCard -> {
-        nextClickCount++
-        Log.d("GameDebug", "Click Siguiente #$nextClickCount | Mostrando índice: ${currentIndex + 1} de ${cardList.size}")
-        nextCard()
-      }
+      GameIntent.NextCard -> nextCard()
     }
   }
 
   private fun loadCards(categoryId: String) {
     viewModelScope.launch {
-      Log.d("GameDebug", "--- Nueva Sesión de Juego: $categoryId ---")
-      
-      // Reinicio síncrono
+      // Reinicio síncrono para pureza de sesión
       _uiState.update { GameState.Loading }
       cardList = emptyList()
       currentIndex = 0
       playerIndex = 0
-      nextClickCount = 0
       currentSessionKey = UUID.randomUUID().toString()
 
       try {
-        // 1. Cargar configuración (Atomicamente con el primer Success)
+        // 1. Obtener configuración de sesión (priorizando local)
         val category = getCategoryByIdUseCase(categoryId).first()
         isNewUiEnabled = gameRepository.isFeatureFlagActive("use_new_game_ui")
         currentStyleKey = category?.styleKey
@@ -94,17 +82,16 @@ class GameViewModel(
         // 2. Obtener jugadores
         players = playerRepository.getPlayers().first()
 
-        // 3. Sincronizar y esperar
+        // 3. Sincronizar y esperar para integridad de datos
         syncCardsByCategoryUseCase(categoryId)
 
-        // 4. Obtener cartas finales
+        // 4. Obtener cartas finales tras sincronización
         val cards = getCardsByCategoryUseCase(categoryId).first()
         
         if (cards.isEmpty()) {
           _uiState.update { GameState.Empty }
         } else {
           cardList = cards.shuffled()
-          Log.d("GameDebug", "Juego Inicializado. Total: ${cardList.size} | Session: $currentSessionKey")
           updateState()
         }
       } catch (e: Exception) {
