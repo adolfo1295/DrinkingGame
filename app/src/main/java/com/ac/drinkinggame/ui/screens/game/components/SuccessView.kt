@@ -30,11 +30,29 @@ import com.ac.drinkinggame.ui.theme.SabiondoPrimary
 fun SuccessView(
   card: GameCard,
   player: Player?,
-  onNext: () -> Unit
+  onNext: () -> Unit,
+  categoryId: String,
+  useNewGameUi: Boolean = false,
+  sessionAccentColor: Color = SabiondoPrimary
 ) {
   val rotation = remember { Animatable(0f) }
   var displayedCard by remember { mutableStateOf(card) }
   var isFirstLoad by remember { mutableStateOf(true) }
+  var currentCategory by remember { mutableStateOf(categoryId) }
+
+  // En el modo clásico, unificamos al azul de la marca para mayor consistencia.
+  // En el modo nuevo, usamos el color dinámico de la sesión de Supabase.
+  val finalAccentColor = if (useNewGameUi) {
+    sessionAccentColor
+  } else {
+    SabiondoPrimary
+  }
+
+  if (currentCategory != categoryId) {
+    currentCategory = categoryId
+    isFirstLoad = true
+    displayedCard = card
+  }
 
   LaunchedEffect(card.id) {
     if (!isFirstLoad && card.id != displayedCard.id) {
@@ -56,17 +74,19 @@ fun SuccessView(
   ) {
     player?.let {
       Card(
-        colors = CardDefaults.cardColors(containerColor = SabiondoPrimary.copy(alpha = 0.15f)),
+        colors = CardDefaults.cardColors(
+          containerColor = if (useNewGameUi) finalAccentColor.copy(alpha = 0.1f) else SabiondoPrimary.copy(alpha = 0.15f)
+        ),
         shape = CircleShape,
-        border = BorderStroke(1.dp, SabiondoPrimary.copy(alpha = 0.3f))
+        border = if (useNewGameUi) BorderStroke(1.5.dp, finalAccentColor.copy(alpha = 0.4f)) else null
       ) {
         Text(
-          text = stringResource(R.string.game_player_turn, it.name),
-          style = MaterialTheme.typography.titleMedium,
+          text = stringResource(R.string.game_player_turn, it.name).uppercase(),
+          style = MaterialTheme.typography.labelLarge,
           fontWeight = FontWeight.Black,
-          color = SabiondoPrimary,
+          color = if (useNewGameUi) finalAccentColor else SabiondoPrimary,
           modifier = Modifier
-            .padding(horizontal = 24.dp, vertical = 8.dp)
+            .padding(horizontal = 20.dp, vertical = 10.dp)
             .testTag("player_name")
         )
       }
@@ -74,34 +94,18 @@ fun SuccessView(
 
     Spacer(modifier = Modifier.weight(1f))
 
-    Card(
-      modifier = Modifier
-        .fillMaxWidth()
-        .padding(vertical = 16.dp)
-        .graphicsLayer {
-          rotationY = rotation.value
-          cameraDistance = 12f * density
-        },
-      colors = CardDefaults.cardColors(containerColor = NightclubCard),
-      shape = RoundedCornerShape(40.dp),
-      border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f)),
-      elevation = CardDefaults.cardElevation(defaultElevation = 20.dp)
-    ) {
-      val isFlipped = rotation.value > 90f
-
-      Box(
-        modifier = Modifier
-          .fillMaxWidth()
-          .graphicsLayer {
-            if (isFlipped) rotationY = 180f
-          }
-      ) {
-        if (!isFlipped) {
-          CardContent(card = displayedCard)
-        } else {
-          CardContent(card = card)
-        }
-      }
+    if (useNewGameUi) {
+      NeonGameCard(
+        card = if (rotation.value > 90f) card else displayedCard,
+        rotation = rotation.value,
+        accentColor = finalAccentColor
+      )
+    } else {
+      ClassicGameCard(
+        card = if (rotation.value > 90f) card else displayedCard,
+        rotation = rotation.value,
+        accentColor = finalAccentColor
+      )
     }
 
     Spacer(modifier = Modifier.weight(1.2f))
@@ -113,10 +117,12 @@ fun SuccessView(
         .fillMaxWidth()
         .height(72.dp)
         .testTag("next_card_button"),
-      shape = RoundedCornerShape(20.dp),
+      shape = RoundedCornerShape(24.dp),
       colors = ButtonDefaults.buttonColors(
-        containerColor = MaterialTheme.colorScheme.primary,
-        disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+        containerColor = if (useNewGameUi) finalAccentColor else MaterialTheme.colorScheme.primary,
+        contentColor = Color.White,
+        disabledContainerColor = if (useNewGameUi) finalAccentColor.copy(alpha = 0.3f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+        disabledContentColor = Color.White.copy(alpha = 0.5f)
       )
     ) {
       Text(
@@ -124,16 +130,77 @@ fun SuccessView(
           stringResource(R.string.game_card_shuffling)
         } else {
           stringResource(R.string.game_card_understood)
-        },
-        fontSize = 20.sp,
-        fontWeight = FontWeight.Black
+        }.uppercase(),
+        fontSize = 18.sp,
+        fontWeight = FontWeight.Black,
+        letterSpacing = 1.sp
       )
     }
   }
 }
 
 @Composable
-private fun CardContent(card: GameCard) {
+private fun NeonGameCard(
+  card: GameCard,
+  rotation: Float,
+  accentColor: Color
+) {
+  Card(
+    modifier = Modifier
+      .fillMaxWidth()
+      .padding(vertical = 12.dp)
+      .graphicsLayer {
+        rotationY = rotation
+        cameraDistance = 15f * density
+      },
+    colors = CardDefaults.cardColors(containerColor = Color(0xFF1E2230)),
+    shape = RoundedCornerShape(32.dp),
+    border = BorderStroke(1.dp, accentColor.copy(alpha = 0.3f)),
+    elevation = CardDefaults.cardElevation(defaultElevation = 16.dp)
+  ) {
+    val isFlipped = rotation > 90f
+    Box(
+      modifier = Modifier
+        .fillMaxWidth()
+        .graphicsLayer { if (isFlipped) rotationY = 180f }
+    ) {
+      CardContent(card = card, accentColor = accentColor, isNeon = true)
+    }
+  }
+}
+
+@Composable
+private fun ClassicGameCard(
+  card: GameCard,
+  rotation: Float,
+  accentColor: Color
+) {
+  Card(
+    modifier = Modifier
+      .fillMaxWidth()
+      .padding(vertical = 16.dp)
+      .graphicsLayer {
+        rotationY = rotation
+        cameraDistance = 12f * density
+      },
+    colors = CardDefaults.cardColors(containerColor = NightclubCard),
+    shape = RoundedCornerShape(40.dp),
+    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f)),
+    elevation = CardDefaults.cardElevation(defaultElevation = 20.dp)
+  ) {
+    val isFlipped = rotation > 90f
+    Box(
+      modifier = Modifier
+        .fillMaxWidth()
+        .graphicsLayer { if (isFlipped) rotationY = 180f }
+    ) {
+      CardContent(card = card, accentColor = accentColor, isNeon = false)
+    }
+  }
+}
+
+@Composable
+private fun CardContent(card: GameCard, accentColor: Color, isNeon: Boolean) {
   Column(
     modifier = Modifier
       .fillMaxWidth()
@@ -141,29 +208,23 @@ private fun CardContent(card: GameCard) {
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.Center
   ) {
-    val (title, color, mainText, description, penalty) = when (card) {
-      is GameCard.Trivia -> {
-        listOf("TRIVIA", SabiondoPrimary, card.question, card.options?.joinToString("\n") ?: "", card.penalty)
-      }
-      is GameCard.Challenge -> {
-        listOf("RETO", LocoPrimary, card.title, card.description, card.penalty)
-      }
-      is GameCard.Rule -> {
-        listOf("REGLA", FamiliarPrimary, card.title, card.rule, 0)
-      }
+    val (title, mainText, description, penalty) = when (card) {
+      is GameCard.Trivia -> listOf("TRIVIA", card.question, card.options?.joinToString("\n") ?: "", card.penalty)
+      is GameCard.Challenge -> listOf("RETO", card.title, card.description, card.penalty)
+      is GameCard.Rule -> listOf("REGLA", card.title, card.rule, 0)
     }.let { list ->
-      listOf(list[0] as String, list[1] as Color, list[2] as String, list[3] as String, list[4] as Int)
+      listOf(list[0] as String, list[1] as String, list[2] as String, list[3] as Int)
     }
 
     Surface(
-      color = color as Color,
-      shape = CircleShape
+      color = accentColor,
+      shape = if (isNeon) RoundedCornerShape(8.dp) else CircleShape
     ) {
       Text(
         text = title as String,
-        modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp),
+        modifier = Modifier.padding(horizontal = 14.dp, vertical = 4.dp),
         color = Color.Black,
-        style = MaterialTheme.typography.labelLarge,
+        style = MaterialTheme.typography.labelMedium,
         fontWeight = FontWeight.Black
       )
     }
@@ -172,38 +233,65 @@ private fun CardContent(card: GameCard) {
 
     Text(
       text = mainText as String,
-      style = MaterialTheme.typography.headlineMedium,
+      style = if (isNeon) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.headlineMedium,
       fontWeight = FontWeight.ExtraBold,
       textAlign = TextAlign.Center,
       color = Color.White,
-      lineHeight = 36.sp
+      lineHeight = if (isNeon) 32.sp else 36.sp
     )
 
-    Spacer(modifier = Modifier.height(20.dp))
+    Spacer(modifier = Modifier.height(24.dp))
 
     Text(
       text = description as String,
-      style = MaterialTheme.typography.titleLarge.copy(fontSize = 22.sp),
+      style = if (isNeon) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.titleLarge,
       textAlign = TextAlign.Center,
       color = Color.White.copy(alpha = 0.7f),
-      lineHeight = 28.sp
+      lineHeight = 24.sp,
+      fontWeight = if (isNeon) FontWeight.Medium else FontWeight.Normal
     )
 
     if ((penalty as Int) > 0) {
-      Spacer(modifier = Modifier.height(40.dp))
-      Text(
-        text = "$penalty",
-        style = MaterialTheme.typography.displayLarge,
-        fontWeight = FontWeight.Black,
-        color = color
-      )
-      Text(
-        text = stringResource(R.string.game_penalty_label),
-        style = MaterialTheme.typography.labelLarge,
-        fontWeight = FontWeight.Black,
-        color = color.copy(alpha = 0.7f),
-        letterSpacing = 4.sp
-      )
+      Spacer(modifier = Modifier.height(56.dp))
+      if (isNeon) {
+        Box(contentAlignment = Alignment.Center, modifier = Modifier.size(90.dp)) {
+          Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = accentColor.copy(alpha = 0.1f),
+            shape = CircleShape,
+            border = BorderStroke(1.dp, accentColor.copy(alpha = 0.2f))
+          ) {}
+          Text(
+            text = "$penalty",
+            style = MaterialTheme.typography.displayMedium,
+            fontWeight = FontWeight.Black,
+            color = accentColor
+          )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+          text = stringResource(R.string.game_penalty_label).uppercase(),
+          style = MaterialTheme.typography.titleMedium,
+          fontWeight = FontWeight.Black,
+          color = accentColor.copy(alpha = 0.8f),
+          letterSpacing = 4.sp
+        )
+      } else {
+        Text(
+          text = "$penalty",
+          style = MaterialTheme.typography.displayLarge,
+          fontWeight = FontWeight.Black,
+          color = accentColor
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+          text = stringResource(R.string.game_penalty_label).uppercase(),
+          style = MaterialTheme.typography.titleSmall,
+          fontWeight = FontWeight.ExtraBold,
+          color = accentColor.copy(alpha = 0.7f),
+          letterSpacing = 4.sp
+        )
+      }
     }
   }
 }

@@ -6,7 +6,9 @@ import kotlinx.coroutines.flow.Flow
 
 interface GameRepository {
   fun getCategories(): Flow<List<Category>>
+  fun getCategoryById(categoryId: String): Flow<Category?>
   fun getCardsByCategory(categoryId: String): Flow<List<GameCard>>
   suspend fun syncCategories(): Result<Unit>
   suspend fun syncCardsByCategory(categoryId: String): Result<Unit>
+  suspend fun isFeatureFlagActive(id: String): Boolean
 }

@@ -7,6 +7,7 @@ import org.koin.dsl.module
 val domainModule = module {
   factoryOf(::GetCategoriesUseCase)
   factoryOf(::SyncCategoriesUseCase)
+  factoryOf(::GetCategoryByIdUseCase)
   factoryOf(::GetCardsByCategoryUseCase)
   factoryOf(::SyncCardsByCategoryUseCase)
 }

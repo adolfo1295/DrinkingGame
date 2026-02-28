@@ -5,5 +5,6 @@ data class Category(
   val name: String,
   val isPremium: Boolean,
   val price: Double,
-  val version: String
+  val version: String,
+  val styleKey: String? = null
 )

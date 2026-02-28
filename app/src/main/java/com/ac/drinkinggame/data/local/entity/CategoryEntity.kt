@@ -10,6 +10,7 @@ data class CategoryEntity(
   val name: String,
   val nameEn: String? = null,
   val isPremium: Boolean,
+  val styleKey: String? = null,
   val price: Double,
   val version: String
 )
@@ -19,14 +20,16 @@ fun CategoryEntity.toDomain(isEnglish: Boolean = false) = Category(
   name = if (isEnglish && nameEn != null) nameEn else name,
   isPremium = isPremium,
   price = price,
-  version = version
+  version = version,
+  styleKey = styleKey
 )
 
 fun Category.toEntity() = CategoryEntity(
   id = id,
-  name = name, // Aquí guardamos el nombre original/español
-  nameEn = null, // Nota: el Mapper de DTO se encargará de llenar esto
+  name = name,
+  nameEn = null,
   isPremium = isPremium,
   price = price,
-  version = version
+  version = version,
+  styleKey = styleKey
 )

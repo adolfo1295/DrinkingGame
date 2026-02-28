@@ -10,6 +10,10 @@ class SyncCategoriesUseCase(private val repository: GameRepository) {
   suspend operator fun invoke() = repository.syncCategories()
 }
 
+class GetCategoryByIdUseCase(private val repository: GameRepository) {
+  operator fun invoke(categoryId: String) = repository.getCategoryById(categoryId)
+}
+
 class GetCardsByCategoryUseCase(private val repository: GameRepository) {
   operator fun invoke(categoryId: String) = repository.getCardsByCategory(categoryId)
 }

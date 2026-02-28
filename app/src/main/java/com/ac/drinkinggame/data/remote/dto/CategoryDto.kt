@@ -9,6 +9,7 @@ data class CategoryDto(
   val name: String,
   @SerialName("name_en") val nameEn: String? = null,
   @SerialName("is_premium") val isPremium: Boolean,
+  @SerialName("style_key") val styleKey: String? = null,
   val price: Double,
   val version: String
 )

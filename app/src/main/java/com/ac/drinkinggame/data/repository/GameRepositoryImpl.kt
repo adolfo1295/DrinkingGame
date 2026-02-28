@@ -30,6 +30,10 @@ class GameRepositoryImpl(
     }
   }
 
+  override fun getCategoryById(categoryId: String): Flow<Category?> {
+    return categoryDao.getCategoryById(categoryId).map { it?.toDomain(isEnglish) }
+  }
+
   override fun getCardsByCategory(categoryId: String): Flow<List<GameCard>> {
     return cardDao.getCardsByCategory(categoryId).map { entities ->
       entities.map { entity ->
@@ -63,6 +67,10 @@ class GameRepositoryImpl(
       Unit
     }
   }
+
+  override suspend fun isFeatureFlagActive(id: String): Boolean {
+    return apiService.getFeatureFlag(id).map { it.firstOrNull()?.isActive ?: false }.getOrDefault(false)
+  }
 }
 
 fun CategoryDto.toDomain(isEnglish: Boolean = false) = Category(
@@ -70,7 +78,8 @@ fun CategoryDto.toDomain(isEnglish: Boolean = false) = Category(
   name = if (isEnglish && nameEn != null) nameEn else name,
   isPremium = isPremium,
   price = price,
-  version = version
+  version = version,
+  styleKey = styleKey
 )
 
 fun CardDto.toDomain(isEnglish: Boolean = false): GameCard {

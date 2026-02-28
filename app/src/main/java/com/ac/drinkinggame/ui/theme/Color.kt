@@ -14,7 +14,7 @@ val SlateDark = Color(0xFF0F172A)
 val CardSurface = Color(0xFF1E293B)
 
 val SabiondoPrimary = Color(0xFF0EA5E9)
-val LocoPrimary = Color(0xFFD946EF)
+val LocoPrimary = Color(0xFF8B5CF6)
 val FamiliarPrimary = Color(0xFFF97316)
 
 val PenaltyRed = Color(0xFFEF4444)

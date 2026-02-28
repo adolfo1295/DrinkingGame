@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.ac.drinkinggame.domain.model.GameCard
 import com.ac.drinkinggame.domain.model.Player
 import com.ac.drinkinggame.domain.repository.PlayerRepository
+import com.ac.drinkinggame.domain.repository.GameRepository
 import com.ac.drinkinggame.domain.usecase.GetCardsByCategoryUseCase
+import com.ac.drinkinggame.domain.usecase.GetCategoryByIdUseCase
 import com.ac.drinkinggame.domain.usecase.SyncCardsByCategoryUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,6 +15,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
+data class GameSessionConfig(
+  val styleKey: String? = null,
+  val useNewGameUi: Boolean = false
+)
 
 sealed interface GameState {
   data object Loading : GameState
@@ -34,11 +41,16 @@ sealed interface GameIntent {
 class GameViewModel(
   private val getCardsByCategoryUseCase: GetCardsByCategoryUseCase,
   private val syncCardsByCategoryUseCase: SyncCardsByCategoryUseCase,
-  private val playerRepository: PlayerRepository
+  private val getCategoryByIdUseCase: GetCategoryByIdUseCase,
+  private val playerRepository: PlayerRepository,
+  private val gameRepository: GameRepository
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow<GameState>(GameState.Loading)
   val uiState: StateFlow<GameState> = _uiState.asStateFlow()
+
+  private val _sessionConfig = MutableStateFlow(GameSessionConfig())
+  val sessionConfig: StateFlow<GameSessionConfig> = _sessionConfig.asStateFlow()
 
   private var cardList = listOf<GameCard>()
   private var players = listOf<Player>()
@@ -56,32 +68,30 @@ class GameViewModel(
     viewModelScope.launch {
       _uiState.update { GameState.Loading }
 
-      // 1. Obtener jugadores (Solo la primera vez)
-      if (players.isEmpty()) {
-        players = playerRepository.getPlayers().first()
+      // 1. Obtener configuración de sesión inmediatamente
+      val category = getCategoryByIdUseCase(categoryId).first()
+      val isNewUiEnabled = gameRepository.isFeatureFlagActive("use_new_game_ui")
+      
+      _sessionConfig.update { 
+        GameSessionConfig(styleKey = category?.styleKey, useNewGameUi = isNewUiEnabled) 
       }
 
-      // 2. Lanzar sincronización en background (Fire and Forget)
-      launch {
-        try {
-          syncCardsByCategoryUseCase(categoryId)
-        } catch (e: Exception) {
-          // Log error or handle gracefully
-        }
-      }
+      // 2. Obtener jugadores
+      players = playerRepository.getPlayers().first()
 
-      // 3. Suscribirse a los datos de Room
-      getCardsByCategoryUseCase(categoryId).collect { cards ->
-        if (cards.isNotEmpty() && cardList.isEmpty()) {
-          // Inicializar solo si no tenemos cartas cargadas aún
-          cardList = cards.shuffled()
-          currentIndex = 0
-          playerIndex = 0
-          updateState()
-        } else if (cards.isEmpty() && cardList.isEmpty()) {
-          // Si después de intentar cargar/sync no hay nada, mostrar Empty
-          _uiState.update { GameState.Empty }
-        }
+      // 3. Intentar sincronizar primero para tener datos frescos
+      syncCardsByCategoryUseCase(categoryId)
+
+      // 4. Obtener datos de Room una sola vez
+      val cards = getCardsByCategoryUseCase(categoryId).first()
+      
+      if (cards.isEmpty()) {
+        _uiState.update { GameState.Empty }
+      } else {
+        cardList = cards.shuffled()
+        currentIndex = 0
+        playerIndex = 0
+        updateState()
       }
     }
   }

@@ -36,7 +36,7 @@ import org.koin.androidx.compose.koinViewModel
 fun HomeScreen(
   onCategorySelected: (String) -> Unit,
   viewModel: HomeViewModel = koinViewModel(),
-  columns: Int = 1
+  columns: Int = 2
 ) {
   val state by viewModel.uiState.collectAsStateWithLifecycle()
   var showPlayersDialog by remember { mutableStateOf(false) }
