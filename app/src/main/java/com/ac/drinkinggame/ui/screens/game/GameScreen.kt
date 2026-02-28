@@ -31,6 +31,7 @@ fun getAuraAccentColor(styleKey: String?): Color {
     "AURA_TOXIC_GREEN" -> Color(0xFF00C853)
     "AURA_NIGHT_BLUE" -> Color(0xFF1565C0)
     "AURA_GOLDEN_AMBER" -> Color(0xFFFFA000)
+    "AURA_MEXA_GREEN" -> Color(0xFF008450)
     else -> SabiondoPrimary
   }
 }
