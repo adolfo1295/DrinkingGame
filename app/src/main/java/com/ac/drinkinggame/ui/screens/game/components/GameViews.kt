@@ -16,9 +16,9 @@ import com.ac.drinkinggame.R
 import com.ac.drinkinggame.ui.theme.SabiondoPrimary
 
 @Composable
-fun LoadingView() {
+fun LoadingView(color: Color = SabiondoPrimary) {
   Column(horizontalAlignment = Alignment.CenterHorizontally) {
-    CircularProgressIndicator(color = SabiondoPrimary)
+    CircularProgressIndicator(color = color)
     Spacer(modifier = Modifier.height(16.dp))
     Text(
       text = stringResource(R.string.game_loading_cards),

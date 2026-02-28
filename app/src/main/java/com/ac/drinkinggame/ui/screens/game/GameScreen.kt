@@ -53,14 +53,11 @@ fun GameScreen(
   modifier: Modifier = Modifier
 ) {
   val state by viewModel.uiState.collectAsStateWithLifecycle()
+  val sessionConfig by viewModel.sessionConfig.collectAsStateWithLifecycle()
   
-  val successState = state as? GameState.Success
-  val useNewGameUi = successState?.useNewGameUi ?: false
-  val auraStyleKey = successState?.categoryStyleKey
-  
-  val sessionAccentColor = getAuraAccentColor(auraStyleKey)
-  val backgroundColor = if (useNewGameUi) {
-    getCategoryColor(auraStyleKey)
+  val sessionAccentColor = getAuraAccentColor(sessionConfig.styleKey)
+  val backgroundColor = if (sessionConfig.useNewGameUi) {
+    getCategoryColor(sessionConfig.styleKey)
   } else {
     MaterialTheme.colorScheme.background
   }
@@ -106,13 +103,15 @@ fun GameScreen(
       ) { targetState ->
 
         when (targetState) {
-          GameState.Loading -> LoadingView()
+          GameState.Loading -> LoadingView(
+            color = if (sessionConfig.useNewGameUi) sessionAccentColor else SabiondoPrimary
+          )
           is GameState.Success -> SuccessView(
             card = targetState.currentCard,
             player = targetState.currentPlayer,
             onNext = { viewModel.onIntent(GameIntent.NextCard) },
             categoryId = categoryId,
-            useNewGameUi = targetState.useNewGameUi,
+            useNewGameUi = sessionConfig.useNewGameUi,
             sessionAccentColor = sessionAccentColor
           )
 
