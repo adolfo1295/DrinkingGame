@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ac.drinkinggame.ui.screens.game.components.EmptyView
@@ -66,6 +67,15 @@ fun GameScreen(
     getCategoryColor(currentStyleKey)
   } else {
     MaterialTheme.colorScheme.background
+  }
+
+  // --- Mantener pantalla encendida durante el juego ---
+  val view = LocalView.current
+  DisposableEffect(view) {
+    view.keepScreenOn = true
+    onDispose {
+      view.keepScreenOn = false
+    }
   }
 
   LaunchedEffect(categoryId) {
