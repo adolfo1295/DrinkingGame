@@ -19,7 +19,7 @@ class GameRepositoryImplTest {
   @Test
   fun `CategoryDto toDomain should use English name when isEnglish is true`() {
     // Given
-    val dto = CategoryDto("1", "Nombre ES", "Name EN", false, 0.0, "1.0")
+    val dto = CategoryDto("1", "Nombre ES", "Name EN", false, "SABIONDO", 0.0, "1.0")
 
     // When
     val domain = dto.toDomain(isEnglish = true)
@@ -31,7 +31,7 @@ class GameRepositoryImplTest {
   @Test
   fun `CategoryDto toDomain should fallback to default name when English name is null`() {
     // Given
-    val dto = CategoryDto("1", "Nombre ES", null, false, 0.0, "1.0")
+    val dto = CategoryDto("1", "Nombre ES", null, false, "SABIONDO", 0.0, "1.0")
 
     // When
     val domain = dto.toDomain(isEnglish = true)

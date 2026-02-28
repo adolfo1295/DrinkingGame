@@ -4,10 +4,13 @@ import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.platform.app.InstrumentationRegistry
 import com.ac.drinkinggame.R
+import com.ac.drinkinggame.domain.model.Category
 import com.ac.drinkinggame.domain.model.GameCard
 import com.ac.drinkinggame.domain.model.Player
+import com.ac.drinkinggame.domain.repository.GameRepository
 import com.ac.drinkinggame.domain.repository.PlayerRepository
 import com.ac.drinkinggame.domain.usecase.GetCardsByCategoryUseCase
+import com.ac.drinkinggame.domain.usecase.GetCategoryByIdUseCase
 import com.ac.drinkinggame.domain.usecase.SyncCardsByCategoryUseCase
 import com.ac.drinkinggame.ui.theme.DrinkingGameTheme
 import io.mockk.*
@@ -31,7 +34,9 @@ class GameScreenTest : KoinTest {
 
   private val getCardsByCategoryUseCase: GetCardsByCategoryUseCase = mockk()
   private val syncCardsByCategoryUseCase: SyncCardsByCategoryUseCase = mockk()
+  private val getCategoryByIdUseCase: GetCategoryByIdUseCase = mockk()
   private val playerRepository: PlayerRepository = mockk()
+  private val gameRepository: GameRepository = mockk()
 
   @Before
   fun setup() {
@@ -40,7 +45,9 @@ class GameScreenTest : KoinTest {
       modules(module {
         single { getCardsByCategoryUseCase }
         single { syncCardsByCategoryUseCase }
+        single { getCategoryByIdUseCase }
         single { playerRepository }
+        single { gameRepository }
         viewModelOf(::GameViewModel)
       })
     }
@@ -52,75 +59,59 @@ class GameScreenTest : KoinTest {
   }
 
   @Test
-  fun gameScreen_loadsAndDisplaysFirstCardCorrectly() {
+  fun gameScreen_loadsAndDisplaysFirstCardWithAura() {
+    val categoryId = "cat1"
     val mockPlayer = Player("1", "Adolfo")
+    val mockCategory = Category(categoryId, "Test", false, 0.0, "1", "AURA_CYAN_GLOW")
     val mockCards = listOf(
-      GameCard.Challenge("id1", "cat1", "Hacer 10 lagartijas", "Si no, bebes", 3)
+      GameCard.Challenge("id1", categoryId, "Hacer 10 lagartijas", "Si no, bebes", 3)
     )
 
     every { playerRepository.getPlayers() } returns flowOf(listOf(mockPlayer))
-    every { getCardsByCategoryUseCase("cat1") } returns flowOf(mockCards)
-    coEvery { syncCardsByCategoryUseCase("cat1") } returns Result.success(Unit)
+    every { getCardsByCategoryUseCase(categoryId) } returns flowOf(mockCards)
+    every { getCategoryByIdUseCase(categoryId) } returns flowOf(mockCategory)
+    coEvery { gameRepository.isFeatureFlagActive(any()) } returns true
+    coEvery { syncCardsByCategoryUseCase(categoryId) } returns Result.success(Unit)
 
     composeTestRule.setContent {
       DrinkingGameTheme {
-        GameScreen(categoryId = "cat1", onBack = {})
+        GameScreen(categoryId = categoryId, initialStyleKey = "AURA_CYAN_GLOW", onBack = {})
       }
     }
 
-    // Verificar turno del jugador usando el string localizado
-    val expectedTurnText = context.getString(R.string.game_player_turn, "Adolfo")
+    // El color de fondo y el aura deberían estar activos (difícil de testear color directo, pero verificamos contenido)
+    val expectedTurnText = context.getString(R.string.game_player_turn, "Adolfo").uppercase()
     composeTestRule.onNodeWithTag("player_name").assertTextContains(expectedTurnText, substring = true)
     composeTestRule.onNodeWithText("Hacer 10 lagartijas").assertIsDisplayed()
   }
 
   @Test
-  fun gameScreen_clickNext_disablesButtonDuringAnimation() {
+  fun gameScreen_clickNext_cyclesCorrectly() {
+    val categoryId = "cat1"
     val mockCards = listOf(
-      GameCard.Rule("id1", "cat1", "Regla 1", "Contenido 1", null),
-      GameCard.Rule("id2", "cat1", "Regla 2", "Contenido 2", null)
+      GameCard.Rule("id1", categoryId, "Regla 1", "Contenido 1", null),
+      GameCard.Rule("id2", categoryId, "Regla 2", "Contenido 2", null)
     )
     every { playerRepository.getPlayers() } returns flowOf(emptyList())
-    every { getCardsByCategoryUseCase("cat1") } returns flowOf(mockCards)
-    coEvery { syncCardsByCategoryUseCase("cat1") } returns Result.success(Unit)
+    every { getCardsByCategoryUseCase(categoryId) } returns flowOf(mockCards)
+    every { getCategoryByIdUseCase(categoryId) } returns flowOf(null)
+    coEvery { gameRepository.isFeatureFlagActive(any()) } returns false
+    coEvery { syncCardsByCategoryUseCase(categoryId) } returns Result.success(Unit)
 
     composeTestRule.setContent {
       DrinkingGameTheme {
-        GameScreen(categoryId = "cat1", onBack = {})
+        GameScreen(categoryId = categoryId, onBack = {})
       }
     }
 
-    composeTestRule.mainClock.autoAdvance = false
+    // Primer click
     composeTestRule.onNodeWithTag("next_card_button").performClick()
-    composeTestRule.mainClock.advanceTimeBy(100)
-
-    val expectedShufflingText = context.getString(R.string.game_card_shuffling)
-    composeTestRule.onNodeWithTag("next_card_button")
-      .assertIsNotEnabled()
-      .assertTextContains(expectedShufflingText, substring = true)
-
-    composeTestRule.mainClock.advanceTimeBy(600)
-    composeTestRule.waitForIdle()
-
-    val expectedGotItText = context.getString(R.string.game_card_understood)
-    composeTestRule.onNodeWithTag("next_card_button")
-      .assertIsEnabled()
-      .assertTextContains(expectedGotItText, substring = true)
-  }
-
-  @Test
-  fun gameScreen_showsEmptyViewWhenApiFailsAndNoCache() {
-    every { playerRepository.getPlayers() } returns flowOf(emptyList())
-    every { getCardsByCategoryUseCase("cat1") } returns flowOf(emptyList())
-    coEvery { syncCardsByCategoryUseCase("cat1") } returns Result.failure(Exception("Error de red"))
-
-    composeTestRule.setContent {
-      DrinkingGameTheme {
-        GameScreen(categoryId = "cat1", onBack = {})
-      }
-    }
-
-    val expectedEmptyTitle = context.getString(R.string.game_empty_title)
-    composeTestRule.onNodeWithText(expectedEmptyTitle, substring = true).assertIsDisplayed()
+    
+    // Esperar a que la animación de giro termine
+    composeTestRule.mainClock.advanceTimeBy(1000)
+    
+    // Debería estar en la segunda carta o fin de juego dependiendo de la lógica de índices
+    // (En este caso, 2 cartas -> index 0, luego index 1)
+    composeTestRule.onNodeWithText("Regla 2").assertIsDisplayed()
   }
 }

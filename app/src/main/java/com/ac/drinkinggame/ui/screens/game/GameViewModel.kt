@@ -65,13 +65,13 @@ class GameViewModel(
   }
 
   private fun loadCards(categoryId: String) {
+    currentSessionKey = UUID.randomUUID().toString() // Generación inmediata
     viewModelScope.launch {
       // Reinicio síncrono para pureza de sesión
       _uiState.update { GameState.Loading }
       cardList = emptyList()
       currentIndex = 0
       playerIndex = 0
-      currentSessionKey = UUID.randomUUID().toString()
 
       try {
         // 1. Obtener configuración de sesión (priorizando local)

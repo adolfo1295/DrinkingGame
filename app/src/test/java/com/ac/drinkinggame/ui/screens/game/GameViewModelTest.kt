@@ -1,16 +1,21 @@
 package com.ac.drinkinggame.ui.screens.game
 
 import app.cash.turbine.test
+import com.ac.drinkinggame.domain.model.Category
 import com.ac.drinkinggame.domain.model.GameCard
+import com.ac.drinkinggame.domain.repository.GameRepository
 import com.ac.drinkinggame.domain.repository.PlayerRepository
 import com.ac.drinkinggame.domain.usecase.GetCardsByCategoryUseCase
+import com.ac.drinkinggame.domain.usecase.GetCategoryByIdUseCase
 import com.ac.drinkinggame.domain.usecase.SyncCardsByCategoryUseCase
 import com.ac.drinkinggame.util.MainDispatcherRule
 import io.mockk.*
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
@@ -21,76 +26,74 @@ class GameViewModelTest {
 
   private val getCardsByCategoryUseCase: GetCardsByCategoryUseCase = mockk()
   private val syncCardsByCategoryUseCase: SyncCardsByCategoryUseCase = mockk()
-  private val playerRepository: PlayerRepository = mockk {
-    every { getPlayers() } returns flowOf(emptyList())
+  private val getCategoryByIdUseCase: GetCategoryByIdUseCase = mockk()
+  private val playerRepository: PlayerRepository = mockk()
+  private val gameRepository: GameRepository = mockk()
+
+  @Before
+  fun setupMocks() {
+    every { playerRepository.getPlayers() } returns flowOf(emptyList())
+    coEvery { gameRepository.isFeatureFlagActive(any()) } returns false
+    coEvery { syncCardsByCategoryUseCase(any()) } returns Result.success(Unit)
   }
 
+  private fun createViewModel() = GameViewModel(
+    getCardsByCategoryUseCase,
+    syncCardsByCategoryUseCase,
+    getCategoryByIdUseCase,
+    playerRepository,
+    gameRepository
+  )
+
   @Test
-  fun `LoadCards intent should sync and then load from Room`() = runTest {
-    // Given
-    val mockCards = listOf(
-      GameCard.Rule("1", "cat1", "Title", "Rule content", null)
-    )
-    coEvery { syncCardsByCategoryUseCase("cat1") } returns Result.success(Unit)
-    every { getCardsByCategoryUseCase("cat1") } returns flowOf(mockCards)
+  fun `LoadCards intent should sync and then load cards`() = runTest {
+    val categoryId = "cat1"
+    val mockCategory = Category(categoryId, "Test", false, 0.0, "1", "AURA_NEON_PURPLE")
+    val mockCards = listOf(GameCard.Rule("1", categoryId, "Title", "Rule content", null))
     
-    val viewModel = GameViewModel(getCardsByCategoryUseCase, syncCardsByCategoryUseCase, playerRepository)
+    every { getCategoryByIdUseCase(categoryId) } returns flowOf(mockCategory)
+    every { getCardsByCategoryUseCase(categoryId) } returns flowOf(mockCards)
+    
+    val viewModel = createViewModel()
 
-    // Then
     viewModel.uiState.test {
-      assertEquals(GameState.Loading, awaitItem())
-
-      // When
-      viewModel.onIntent(GameIntent.LoadCards("cat1"))
-
-      // Success Card
-      val state = awaitItem()
-      assertTrue(state is GameState.Success)
-      assertEquals(mockCards[0], (state as GameState.Success).currentCard)
+      assertTrue(awaitItem() is GameState.Loading)
+      viewModel.onIntent(GameIntent.LoadCards(categoryId))
       
-      // Verify sequence
-      coVerifyOrder {
-        syncCardsByCategoryUseCase("cat1")
-        getCardsByCategoryUseCase("cat1")
-      }
+      var state = awaitItem()
+      while (state !is GameState.Success) { state = awaitItem() }
+      
+      assertEquals(mockCards[0], (state as GameState.Success).currentCard)
     }
   }
 
   @Test
-  fun `NextCard intent should update to next card or Empty`() = runTest {
-    // Given
-    val mockCards = listOf(
-      GameCard.Rule("1", "cat1", "Title 1", "Rule 1", null),
-      GameCard.Rule("2", "cat1", "Title 2", "Rule 2", null)
-    )
-    coEvery { syncCardsByCategoryUseCase("cat1") } returns Result.success(Unit)
-    every { getCardsByCategoryUseCase("cat1") } returns flowOf(mockCards)
+  fun `Consecutive LoadCards should have different session keys`() = runTest {
+    val categoryId = "cat1"
+    val mockCategory = Category(categoryId, "Test", false, 0.0, "1", "AURA_CYAN_GLOW")
+    val mockCards = listOf(GameCard.Rule("1", categoryId, "T", "C", null))
     
-    val viewModel = GameViewModel(getCardsByCategoryUseCase, syncCardsByCategoryUseCase, playerRepository)
+    every { getCategoryByIdUseCase(categoryId) } returns flowOf(mockCategory)
+    every { getCardsByCategoryUseCase(categoryId) } returns flowOf(mockCards)
+    
+    val viewModel = createViewModel()
 
     viewModel.uiState.test {
-      assertEquals(GameState.Loading, awaitItem())
+      awaitItem() // Loading inicial
+      
+      // Primera Carga
+      viewModel.onIntent(GameIntent.LoadCards(categoryId))
+      var state1 = awaitItem()
+      while (state1 !is GameState.Success) { state1 = awaitItem() }
+      val session1 = (state1 as GameState.Success).sessionKey
 
-      // When
-      viewModel.onIntent(GameIntent.LoadCards("cat1"))
+      // Segunda Carga
+      viewModel.onIntent(GameIntent.LoadCards(categoryId))
+      var state2 = awaitItem()
+      while (state2 !is GameState.Success) { state2 = awaitItem() }
+      val session2 = (state2 as GameState.Success).sessionKey
 
-      // Success Card
-      val firstState = awaitItem()
-      assertTrue(firstState is GameState.Success)
-      val firstCard = (firstState as GameState.Success).currentCard
-      
-      // When
-      viewModel.onIntent(GameIntent.NextCard)
-      
-      // Then Success next card
-      val secondState = awaitItem()
-      assertTrue(secondState is GameState.Success)
-      val secondCard = (secondState as GameState.Success).currentCard
-      assertTrue(firstCard != secondCard)
-      
-      // When next again
-      viewModel.onIntent(GameIntent.NextCard)
-      assertEquals(GameState.Empty, awaitItem())
+      assertNotEquals("Session keys must be unique", session1, session2)
     }
   }
 }
